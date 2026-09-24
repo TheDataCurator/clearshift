@@ -1,0 +1,6 @@
+qualification_id,name,is_regulated,regulation_reference,requires_supervised_first_performance,scope,validity_months,renewal_warning_days
+LOTO,Lockout/Tagout Authorized,true,29 CFR 1910.147,false,PORTABLE,12,60
+CONFINED,Confined Space Entrant,true,29 CFR 1910.146,true,SITE_SPECIFIC,12,60
+HOTWORK,Hot Work / Welding Permit,true,29 CFR 1910.252,true,PORTABLE,12,45
+PSM,Process Safety Management Qualified,true,29 CFR 1910.119,false,PORTABLE,24,90
+FORKLIFT,Powered Industrial Truck Operator,true,29 CFR 1910.178,false,PORTABLE,36,60

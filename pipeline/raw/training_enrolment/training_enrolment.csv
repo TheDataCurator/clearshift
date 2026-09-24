@@ -1,0 +1,3 @@
+enrolment_id,session_id,employee_id,status
+1,1,E104,ENROLLED
+2,1,E103,WAITLIST

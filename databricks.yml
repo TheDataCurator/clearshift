@@ -1,0 +1,46 @@
+# Databricks Asset Bundle for the ClearShift medallion pipeline.
+#
+# Deploys the Lakeflow Declarative Pipeline that builds bronze/silver/gold from
+# the synthetic raw source files. The Streamlit/Lakebase app deploys separately
+# via app/app.yaml and is unaffected by this bundle.
+#
+# Before deploying, set the workspace host (placeholder below) and upload the
+# raw/ folders to the volume named in clearshift.raw_path, then:
+#   databricks bundle deploy -t dev
+#   databricks bundle run clearshift_pipeline -t dev
+
+bundle:
+  name: clearshift
+
+variables:
+  catalog:
+    description: Unity Catalog holding the bronze/silver/gold schemas.
+    default: clearshift
+  raw_path:
+    description: Volume path holding the raw source folders that bronze ingests.
+    default: /Volumes/clearshift/raw/landing
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      # Set this to your workspace host before deploying.
+      host: https://REPLACE-WITH-YOUR-WORKSPACE.cloud.databricks.com
+    resources:
+      pipelines:
+        clearshift_pipeline:
+          name: clearshift-medallion
+          catalog: ${var.catalog}
+          # Serverless so it needs no cluster policy or instance sizing.
+          serverless: true
+          photon: true
+          development: true
+          continuous: false
+          libraries:
+            - file:
+                path: ./pipeline/clearshift_pipeline.py
+          configuration:
+            clearshift.raw_path: ${var.raw_path}
+          # Each layer lands in its own schema within the catalog.
+          schema: gold

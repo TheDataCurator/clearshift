@@ -1,0 +1,10 @@
+employee_id,work_date,scheduled_wc_code,scheduled_wc_value,scheduled_wc_desc,actual_wc_code,actual_wc_value,actual_wc_desc,scheduled_segment_count,scheduled_total_seconds,scheduled_hours,worked_span_count,worked_total_seconds,worked_hours,variance_hours,wc_count_on_date,has_transfer_on_date,assignment_status
+E101,2026-09-24,WC_LINE1,WC_LINE1,Line 1 Assembly,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E102,2026-09-24,WC_TANK,WC_TANK,Tank Entry / Weld,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E103,2026-09-24,WC_LINE1,WC_LINE1,Line 1 Assembly,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E104,2026-09-24,WC_LINE1,WC_LINE1,Line 1 Assembly,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E201,2026-09-24,WC_TANK,WC_TANK,Tank Entry / Weld,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E202,2026-09-24,WC_DOCK,WC_DOCK,Shipping Dock,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E100,2026-09-24,WC_REACTOR,WC_REACTOR,Reactor House,,,,1,28800,8,0,0,0,0,1,false,SCHEDULED
+E104,2026-09-20,WC_DOCK,WC_DOCK,Shipping Dock,WC_LINE1,WC_LINE1,Line 1 Assembly,1,28800,8,1,28800,8,0,1,true,WORKED
+E102,2026-09-03,WC_TANK,WC_TANK,Tank Entry / Weld,WC_TANK,WC_TANK,Tank Entry / Weld,1,28800,8,1,28800,8,0,1,false,WORKED

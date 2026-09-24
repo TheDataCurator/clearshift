@@ -1,0 +1,2 @@
+recordable_incident_id,case_number,employee_id,site_id,incident_on,work_center_id,classification,days_away,days_restricted,description
+1,MM-2026-014,E104,PEIL,2026-09-20,WC_LINE1,RESTRICTED_TRANSFER,0,4,Minor injury during unplanned transfer while LOTO lapsed

@@ -1,0 +1,8 @@
+employee_id,work_center_id,work_center_desc,work_center_source,effective_date
+E101,WC_LINE1,Line 1 Assembly,UKG,2026-09-13
+E102,WC_TANK,Tank Entry / Weld,UKG,2026-09-13
+E103,WC_LINE1,Line 1 Assembly,UKG,2026-09-13
+E104,WC_LINE1,Line 1 Assembly,UKG,2026-09-13
+E201,WC_TANK,Tank Entry / Weld,UKG,2026-09-13
+E202,WC_DOCK,Shipping Dock,UKG,2026-09-13
+E100,WC_REACTOR,Reactor House,UKG,2026-09-13
