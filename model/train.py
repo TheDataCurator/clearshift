@@ -46,7 +46,10 @@ FEATURES = [
     "proactive_renewal_behavior",
 ]
 TARGET = "lapsed_before_next_hazardous_job"
-UC_MODEL = "horizontal_dev_serverless_catalog.clearshift.lapse_risk_model"
+UC_MODEL = os.environ.get(
+    "CLEARSHIFT_UC_MODEL",
+    "horizontal_dev_serverless_catalog.clearshift.lapse_risk_model",
+)
 
 
 def build_model():
