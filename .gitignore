@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+.venv-model/
+model/mlruns/
+model/data/
+*.parquet
