@@ -1,0 +1,22 @@
+command:
+- python
+- -m
+- uvicorn
+- backend.main:app
+- --host=0.0.0.0
+- --port=8000
+env:
+- name: LAKEBASE_HOST
+  value: ep-twilight-meadow-d2urqy3k.database.us-east-1.cloud.databricks.com
+- name: LAKEBASE_PORT
+  value: '5432'
+- name: LAKEBASE_DATABASE
+  value: clearshift
+- name: GATE_SCHEMA
+  value: gate
+- name: LAKEBASE_ENDPOINT
+  value: projects/clearshift/branches/production/endpoints/primary
+# Opening viewer scope. A real deployment derives this from the authenticated
+# principal; here it selects which access scope the application opens in.
+- name: DEFAULT_PRINCIPAL
+  value: manager.whitlock

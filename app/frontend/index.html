@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearShift</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ------------------------------------------------------------ sidebar -->
+  <aside class="side" id="side">
+    <div class="side-top">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <div class="logo-name">ClearShift</div>
+        <div class="logo-sub">on Databricks</div>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <button class="nav-item active" data-view="home">
+        <span class="ni" aria-hidden="true">⌂</span>Home
+      </button>
+      <button class="nav-item" data-view="overview">
+        <span class="ni" aria-hidden="true">◍</span>Overview
+      </button>
+      <button class="nav-item" data-view="shift">
+        <span class="ni" aria-hidden="true">◷</span>Pre-shift clearance
+        <span class="nav-badge hidden" id="nav-badge-shift"></span>
+      </button>
+      <button class="nav-item" data-view="coverage">
+        <span class="ni" aria-hidden="true">◑</span>Coverage &amp; what-if
+      </button>
+      <button class="nav-item" data-view="site">
+        <span class="ni" aria-hidden="true">▤</span>Audit roster
+      </button>
+      <button class="nav-item" data-view="card">
+        <span class="ni" aria-hidden="true">▢</span>Credential card
+      </button>
+      <button class="nav-item" data-view="osha">
+        <span class="ni" aria-hidden="true">⊞</span>OSHA audit
+        <span class="nav-badge hidden" id="nav-badge-osha"></span>
+      </button>
+      <button class="nav-item" data-view="renewal">
+        <span class="ni" aria-hidden="true">↻</span>Renewals
+      </button>
+      <button class="nav-item" data-view="training">
+        <span class="ni" aria-hidden="true">◈</span>Upcoming training
+      </button>
+      <button class="nav-item" data-view="learning">
+        <span class="ni" aria-hidden="true">◐</span>Corporate learning
+      </button>
+      <button class="nav-item" data-view="ask">
+        <span class="ni" aria-hidden="true">✦</span>Ask ClearShift
+      </button>
+      <button class="nav-item" data-view="docs">
+        <span class="ni" aria-hidden="true">◫</span>Documentation
+      </button>
+    </nav>
+
+    <div class="side-foot">
+      <div class="foot-row"><span>Viewing as</span><b id="foot-scope">—</b></div>
+      <label class="visually-hidden" for="principal">Viewing as</label>
+      <select id="principal"></select>
+      <div class="foot-user">
+        <span class="avatar" id="foot-initials">—</span>
+        <span class="foot-who"><b id="foot-name">—</b><i id="foot-role">—</i></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- --------------------------------------------------------------- main -->
+  <main class="content">
+
+    <!-- Home -->
+    <section id="view-home" class="view">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="chip"><i class="dot"></i>Meridian Manufacturing rollout · <span id="home-month"></span></span>
+          <h1>No one performs regulated work<br><em>without proven qualification.</em></h1>
+          <p class="hero-lede">
+            ClearShift checks tomorrow's schedule against the certifications each job and work
+            center requires, flags first-time hazardous work, and produces the evidence an
+            OSHA inspector asks for.
+          </p>
+          <div class="hero-cta">
+            <button class="btn primary" data-goto="shift">See tomorrow's exposure →</button>
+            <button class="btn" data-goto="coverage">Find candidates to close a gap →</button>
+            <button class="btn ghost" data-goto="docs">How it works</button>
+          </div>
+        </div>
+        <div class="hero-cards" id="home-cards"></div>
+      </div>
+
+      <div class="path">
+        <p class="eyebrow">Where to look first</p>
+        <h2>Nine views, in the order the day runs.</h2>
+        <div class="path-grid" id="home-path"></div>
+      </div>
+    </section>
+
+    <!-- Network overview -->
+    <section id="view-overview" class="view hidden">
+      <div class="viewhead">
+        <h2>Overview</h2>
+        <p class="lede">Program status as of <strong id="ov-date"></strong>. Coverage is reported for onboarded sites only.</p>
+      </div>
+      <div class="tiles" id="ov-tiles"></div>
+
+      <nav class="subtabs" id="ov-mode" role="tablist">
+        <button class="subtab active" data-mode="map"      role="tab">Map</button>
+        <button class="subtab"        data-mode="trend"    role="tab">Trend</button>
+        <button class="subtab"        data-mode="schedule" role="tab">Rollout schedule</button>
+      </nav>
+
+      <div id="ov-pane-map">
+      <div class="panel">
+        <div class="panelhead">
+          <h3>Rollout and readiness</h3>
+          <p class="panelsub">Facility readiness across the plant network. Marker color shows readiness, size reflects workforce.</p>
+        </div>
+        <div id="map-wrap">
+          <svg id="map" viewBox="0 0 960 600" role="img"
+               aria-label="Map of facility locations across the continental United States with readiness status"></svg>
+          <div id="map-tip" class="maptip hidden"></div>
+        </div>
+        <div class="legend" id="map-legend"></div>
+      </div>
+      </div>
+
+      <div id="ov-pane-trend" class="hidden">
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Direction over the last quarter</h3>
+            <p class="panelsub">Weekly. Exposure is shown per hundred scheduled shifts, so a quieter week does not read as an improvement.</p>
+          </div>
+          <div id="tr-cards"></div>
+          <div id="tr-charts"></div>
+        </div>
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Recomputed from the source tables</h3>
+            <p class="panelsub">Requirements are effective-dated and credentials carry issue, expiry and revocation dates, so past clearance is derived rather than accumulated.</p>
+          </div>
+          <div class="tablewrap"><table id="tr-derived"></table></div>
+        </div>
+      </div>
+
+      <div id="ov-pane-schedule" class="hidden">
+      <div class="panel">
+        <div class="panelhead"><h3>Rollout schedule</h3></div>
+        <div class="tablewrap"><table id="ov-sites"></table></div>
+      </div>
+      </div>
+    </section>
+
+    <!-- Pre-shift clearance -->
+    <section id="view-shift" class="view hidden">
+      <div class="viewhead">
+        <h2>Pre-shift clearance</h2>
+        <p class="lede">Scheduled work for <strong id="shift-date"></strong>, checked against required qualifications.</p>
+      </div>
+      <div class="tiles" id="shift-tiles"></div>
+      <div id="shift-list" class="cards"></div>
+    </section>
+
+    <!-- Coverage and what-if -->
+    <section id="view-coverage" class="view hidden">
+      <div class="viewhead">
+        <h2>Coverage &amp; what-if</h2>
+        <p class="lede">Credentials with thin or no cover, and the internal candidates closest to closing each gap.</p>
+      </div>
+      <div class="tiles" id="cov-tiles"></div>
+      <div class="panel">
+        <div class="panelhead">
+          <h3>Where cover is thin</h3>
+          <p class="panelsub">Regulated credentials by number of qualified people currently on site.</p>
+        </div>
+        <div id="ov-cover"></div>
+      </div>
+      <div class="panel">
+        <div class="panelhead">
+          <h3>Candidates to close each gap</h3>
+          <p class="panelsub">Ranked by credentials already held and whether they are assigned to work requiring it.</p>
+        </div>
+        <div id="ov-opportunity"></div>
+      </div>
+    </section>
+
+    <!-- Audit roster -->
+    <section id="view-site" class="view hidden">
+      <div class="viewhead">
+        <h2>Audit roster</h2>
+        <p class="lede">Active workers and the regulated qualifications their assignment requires, as of <strong id="roster-date"></strong>.</p>
+      </div>
+      <div class="tiles" id="site-tiles"></div>
+      <div class="tablewrap"><table id="site-table"></table></div>
+    </section>
+
+    <!-- OSHA audit -->
+    <section id="view-osha" class="view hidden">
+      <div class="viewhead">
+        <h2>OSHA audit</h2>
+        <p class="lede" id="osha-lede"></p>
+      </div>
+
+      <nav class="subtabs" id="osha-mode" role="tablist">
+        <button class="subtab active" data-mode="findings"   role="tab">Findings</button>
+        <button class="subtab"        data-mode="conditions" role="tab">Site conditions</button>
+        <button class="subtab"        data-mode="records"    role="tab">Records &amp; incidents</button>
+        <button class="subtab"        data-mode="inspection" role="tab">Inspection roster</button>
+      </nav>
+
+      <div class="tiles" id="osha-tiles"></div>
+
+      <!-- Internal: findings first -->
+      <div id="osha-pane-findings">
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Findings</h3>
+            <p class="panelsub">Credential, evaluation, designation and program gaps across the site. Ordered by severity.</p>
+          </div>
+          <div id="osha-findings"></div>
+        </div>
+      </div>
+
+      <div id="osha-pane-conditions" class="hidden">
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Written programs</h3>
+            <p class="panelsub">Written program versions and review dates. Inspectors typically request these alongside training records.</p>
+          </div>
+          <div class="tablewrap"><table id="osha-programs"></table></div>
+        </div>
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Daily plant checklist</h3>
+            <p class="panelsub">Most recent site conditions check. Failed items link to a corrective action.</p>
+          </div>
+          <div class="tablewrap"><table id="osha-checklist"></table></div>
+        </div>
+      </div>
+
+      <div id="osha-pane-records" class="hidden">
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Worker sign-off</h3>
+            <p class="panelsub">Signed acknowledgments, and credentials held with nothing signed behind them.</p>
+          </div>
+          <div id="osha-acks"></div>
+        </div>
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Recordable incidents</h3>
+            <p class="panelsub">OSHA-recordable cases, cross-referenced to the credentials each work center required on the date.</p>
+          </div>
+          <div class="tablewrap"><table id="osha-incidents"></table></div>
+        </div>
+      </div>
+
+      <!-- Inspection: roster first, spot-checkable -->
+      <div id="osha-pane-inspection" class="hidden">
+        <div class="panel" id="osha-header-panel">
+          <div class="panelhead"><h3>Site metadata</h3></div>
+          <div class="metagrid" id="osha-meta"></div>
+        </div>
+        <div class="panel">
+          <div class="panelhead">
+            <h3>Training and certification matrix</h3>
+            <p class="panelsub">The roster an inspector spot-checks: card serials, trainers, credentials and evidence references.</p>
+            <button class="btn export" id="matrix-export">↓ Export</button>
+          </div>
+          <div class="tablewrap"><table id="osha-matrix"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Credential card -->
+    <section id="view-card" class="view hidden">
+      <div class="viewhead">
+        <h2>Credential card</h2>
+        <p class="lede">The floor-facing view. An inspector asks to see a qualification; this is what is shown on a tablet.</p>
+      </div>
+
+      <div class="picker">
+        <label for="card-who">Worker</label>
+        <select id="card-who"></select>
+        <button class="btn export" id="card-export">↓ Export</button>
+      </div>
+
+      <div id="card-body"></div>
+    </section>
+
+    <!-- Renewals -->
+    <section id="view-renewal" class="view hidden">
+      <div class="viewhead">
+        <h2>Renewals</h2>
+        <p class="lede">Qualifications lapsed or lapsing within ninety days.</p>
+      </div>
+      <div class="tiles" id="renewal-tiles"></div>
+      <div class="bulkbar" id="renewal-bulk">
+        <label class="chk"><input type="checkbox" id="renewal-all"> Select all</label>
+        <span class="bulkcount" id="renewal-count">none selected</span>
+        <button class="btn" id="renewal-notify" disabled>Notify supervisors</button>
+        <button class="btn export" id="renewal-export">↓ Export</button>
+      </div>
+      <div class="tablewrap"><table id="renewal-table"></table></div>
+    </section>
+
+    <!-- Upcoming training -->
+    <section id="view-training" class="view hidden">
+      <div class="viewhead">
+        <h2>Upcoming training</h2>
+        <p class="lede">Regulated certification and general workplace training, plant and office.</p>
+      </div>
+      <div class="tiles" id="tr-tiles"></div>
+      <div class="panel">
+        <div class="panelhead">
+          <h3>Scheduled sessions</h3>
+          <p class="panelsub">Sessions are marked where they would close a qualification gap that exists today.</p>
+        </div>
+        <div class="tablewrap"><table id="tr-table"></table></div>
+      </div>
+    </section>
+
+    <!-- Corporate learning -->
+    <section id="view-learning" class="view hidden">
+      <div class="viewhead">
+        <h2>Corporate learning</h2>
+        <p class="lede">Compliance obligations and elective development for office staff, as of <strong id="lrn-date"></strong>.</p>
+      </div>
+
+      <div class="callout">
+        <span class="co-ico" aria-hidden="true">◐</span>
+        <div>
+          <b>Same system, different resolver.</b> A plant requirement is triggered by the work
+          center and blocks work assignment. A corporate obligation is triggered by role or
+          department and carries a due date. Person, requirement, completion and evidence are
+          shared; only the trigger and the consequence differ.
+        </div>
+      </div>
+
+      <div class="tiles" id="lrn-tiles"></div>
+
+      <nav class="subtabs" id="lrn-mode" role="tablist">
+        <button class="subtab active" data-mode="teams"       role="tab">By manager</button>
+        <button class="subtab"        data-mode="assignments" role="tab">Assignments</button>
+        <button class="subtab"        data-mode="policies"    role="tab">By policy</button>
+      </nav>
+
+      <div id="lrn-pane-teams">
+      <div class="panel">
+        <div class="panelhead">
+          <h3>By manager</h3>
+          <p class="panelsub">Compliance completion by reporting line, rather than by work center.</p>
+        </div>
+        <div class="tablewrap"><table id="lrn-teams"></table></div>
+      </div>
+
+      </div>
+
+      <div id="lrn-pane-assignments" class="hidden">
+      <div class="panel">
+        <div class="panelhead">
+          <h3>Assignments</h3>
+          <p class="panelsub">Compliance obligations carry a due date. Development is elective and has none.</p>
+        </div>
+        <div class="tablewrap"><table id="lrn-rows"></table></div>
+      </div>
+
+      </div>
+
+      <div id="lrn-pane-policies" class="hidden">
+      <div class="panel">
+        <div class="panelhead">
+          <h3>By policy</h3>
+          <p class="panelsub">Completion per program, with the owner and the authority it derives from.</p>
+        </div>
+        <div class="tablewrap"><table id="lrn-policies"></table></div>
+      </div>
+      </div>
+    </section>
+
+    <!-- Ask -->
+    <section id="view-ask" class="view hidden">
+      <div class="viewhead">
+        <h2>Ask ClearShift</h2>
+        <p class="lede">Answers run as governed queries against the same views ClearShift uses, limited to your scope.</p>
+      </div>
+
+      <div class="panel assistant">
+        <div class="asst-head">
+          <span class="asst-mark" aria-hidden="true">✦</span>
+          <div>
+            <h3>ClearShift assistant</h3>
+            <p class="panelsub">Grounded in work center requirements, credential state and the forward schedule</p>
+          </div>
+          <span class="asst-tag" id="asst-mode">governed SQL</span>
+        </div>
+
+        <div class="thread" id="ask-thread" aria-live="polite"></div>
+
+        <div class="suggest" id="ask-suggest"></div>
+
+        <form class="askbar" id="ask-form">
+          <label class="visually-hidden" for="ask-input">Your question</label>
+          <input id="ask-input" type="text" autocomplete="off"
+                 placeholder="Ask about a site, a credential, or tomorrow's schedule…">
+          <button class="btn primary" type="submit" id="ask-send">Ask</button>
+        </form>
+
+        <div class="sources" id="ask-sources"></div>
+      </div>
+    </section>
+
+    <!-- Documentation -->
+    <section id="view-docs" class="view hidden">
+      <div class="viewhead">
+        <h2>Documentation</h2>
+        <p class="lede">Data model, decision logic, wiring, and known gaps.</p>
+      </div>
+      <nav class="subtabs" id="doc-tabs" role="tablist">
+        <button class="subtab active" data-doc="model" role="tab">Data model</button>
+        <button class="subtab" data-doc="logic" role="tab">Decision logic</button>
+        <button class="subtab" data-doc="connect" role="tab">Connecting real data</button>
+        <button class="subtab" data-doc="osha" role="tab">OSHA basis</button>
+        <button class="subtab" data-doc="glossary" role="tab">Glossary</button>
+        <button class="subtab" data-doc="gaps" role="tab">Known gaps</button>
+      </nav>
+      <div class="prose" id="doc-body"></div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
