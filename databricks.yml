@@ -15,18 +15,17 @@ bundle:
 variables:
   catalog:
     description: Unity Catalog holding the bronze/silver/gold schemas.
-    default: clearshift
+    default: horizontal_dev_serverless_catalog
   raw_path:
     description: Volume path holding the raw source folders that bronze ingests.
-    default: /Volumes/clearshift/raw/landing
+    default: /Volumes/horizontal_dev_serverless_catalog/clearshift/landing
 
 targets:
   dev:
     mode: development
     default: true
     workspace:
-      # Set this to your workspace host before deploying.
-      host: https://REPLACE-WITH-YOUR-WORKSPACE.cloud.databricks.com
+      host: https://fevm-horizontal-dev-serverless.cloud.databricks.com
     resources:
       pipelines:
         clearshift_pipeline:
@@ -42,5 +41,6 @@ targets:
                 path: ./pipeline/clearshift_pipeline.py
           configuration:
             clearshift.raw_path: ${var.raw_path}
-          # Each layer lands in its own schema within the catalog.
-          schema: gold
+          # All layers land in the clearshift schema; table names carry the
+          # bronze_/silver_/gold_ prefix.
+          schema: clearshift
