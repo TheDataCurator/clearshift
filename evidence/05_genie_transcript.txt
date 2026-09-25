@@ -1,0 +1,64 @@
+# ClearShift — Genie Agent transcript (natural language over the Unity Catalog gold tables)
+# captured 2026-09-25 15:26 CDT  |  POST /api/ask engine=genie  |  space set-per-environment
+# workspace: fevm-horizontal-dev-serverless (horizontals). Answer, generated SQL, and rows are Genie's real output.
+
+===================================================================
+Q: How many workers have a certification expiring in the next 90 days, by site?
+ENGINE: genie
+ANSWER: **Peoria IL - Plant 3081** has **1** worker with a certification expiring in the next 90 days. In the visible results, **Peoria IL - Plant 3081** is also the highest site by this count at **1** worker.
+SQL:
+SELECT `location`, COUNT(DISTINCT `employee_id`) AS `workers_expiring_next_90_days`
+FROM `horizontal_dev_serverless_catalog`.`clearshift`.`gold_renewal_pipeline`
+WHERE `expires_on` IS NOT NULL
+  AND `location` IS NOT NULL
+  AND `days_until_expiry` IS NOT NULL
+  AND `days_until_expiry` BETWEEN 0 AND 90
+GROUP BY `location`
+ORDER BY `workers_expiring_next_90_days` DESC, `location`
+COLUMNS: ['location', 'workers_expiring_next_90_days']
+ROW: ['Peoria IL - Plant 3081', '1']
+ROW_COUNT: 1
+
+===================================================================
+Q: Which qualifications are held by the fewest workers?
+ENGINE: genie
+ANSWER: The qualifications held by the **fewest workers** are **Powered Industrial Truck Operator** and **Process Safety Management Qualified**, with **1 worker each**. Across the full result set of **2 qualifications**, both are tied for the lowest worker count.
+SQL:
+WITH qualification_counts AS (
+  SELECT
+    `qualification_id`,
+    `qualification_name`,
+    COUNT(DISTINCT `employee_id`) AS `worker_count`
+  FROM `horizontal_dev_serverless_catalog`.`clearshift`.`gold_qualification_state`
+  WHERE `qualification_id` IS NOT NULL
+    AND `qualification_name` IS NOT NULL
+  GROUP BY `qualification_id`, `qualification_name`
+), ranked_qualifications AS (
+  SELECT
+    `qualification_id`,
+    `qualification_name`,
+    `worker_count`,
+    RANK() OVER (ORDER BY `worker_count` ASC) AS `worker_count_rank`
+  FROM qualification_counts
+)
+SELECT
+  `qualification_id`,
+  `qualification_name`,
+  `worker_count`
+FROM ranked_qualifications
+WHERE `worker_count_rank` = 1
+ORDER BY `worker_count` ASC, `qualification_name` ASC
+COLUMNS: ['qualification_id', 'qualification_name', 'worker_count']
+ROW: ['FORKLIFT', 'Powered Industrial Truck Operator', '1']
+ROW: ['PSM', 'Process Safety Management Qualified', '1']
+ROW_COUNT: 2
+
+===================================================================
+Q: List workers whose confined space entry certification has expired.
+ENGINE: genie
+ANSWER: The visible data shows **1 worker** with an expired confined space entry certification: employee ID **E101** for **Confined Space Entrant** at **Peoria IL - Plant 3081**, expired on **2025-07-30**, with evidence reference **cert:E101-CS-old**. In this result, **Peoria IL - Plant 3081** is the only location represented for expired confined space entry certification.
+SQL:
+SELECT `employee_id`, `qualification_name`, `employee_location` AS `location`, `expires_on`, `state`, `evidence_reference` FROM `horizontal_dev_serverless_catalog`.`clearshift`.`gold_qualification_state` WHERE `qualification_name` IS NOT NULL AND `qualification_name` ILIKE '%confined%' AND `state` = 'EXPIRED' ORDER BY `employee_location`, `employee_id`, `qualification_name`
+COLUMNS: ['employee_id', 'qualification_name', 'location', 'expires_on', 'state', 'evidence_reference']
+ROW: ['E101', 'Confined Space Entrant', 'Peoria IL - Plant 3081', '2025-07-30', 'EXPIRED', 'cert:E101-CS-old']
+ROW_COUNT: 1

@@ -843,3 +843,20 @@ td.pick input { width: 16px; height: 16px; accent-color: var(--go); cursor: poin
 
 .tr-marker { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 3 3; }
 .tr-marker-label { fill: var(--ink-faint); font-size: 9.5px; }
+
+/* What-if studio */
+.wi-bar { display: flex; align-items: center; gap: 14px; margin: 14px 0 6px; flex-wrap: wrap; }
+.wi-note { color: var(--muted, #667); font-size: 13px; }
+.wi-h { font-weight: 650; margin: 18px 0 8px; font-size: 14px; }
+.wi-h-stop { color: var(--stop-fg, #b42318); }
+
+/* Ask engine toggle + Genie output */
+#ask-engine { display: flex; align-items: center; gap: 8px; margin: 6px 0 10px; font-size: 13px; color: var(--muted, #667); }
+#ask-engine button { border: 1px solid var(--line, #d5d9e0); background: transparent; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 13px; }
+#ask-engine button.on { background: var(--accent, #1b6ef3); color: #fff; border-color: transparent; }
+.genie-sql { margin-top: 10px; font-size: 13px; }
+.genie-sql summary { cursor: pointer; color: var(--accent, #1b6ef3); }
+.genie-sql pre { white-space: pre-wrap; background: var(--code-bg, #f4f6f9); padding: 10px; border-radius: 8px; overflow-x: auto; font-size: 12px; margin: 8px 0; }
+.genie-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.genie-tbl th, .genie-tbl td { border: 1px solid var(--line, #e2e6ec); padding: 4px 8px; text-align: left; }
+.genie-fallback { color: var(--caution-fg, #8a6d1a); font-size: 12px; margin-top: 6px; }

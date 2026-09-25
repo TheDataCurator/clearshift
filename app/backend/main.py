@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend import config, db
-from backend.routes import ask, gate, overview
+from backend.routes import ask, gate, overview, whatif
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,6 +37,7 @@ app.add_middleware(
 app.include_router(overview.router)
 app.include_router(ask.router)
 app.include_router(gate.router)
+app.include_router(whatif.router)
 
 
 @app.get("/api/health", tags=["health"])

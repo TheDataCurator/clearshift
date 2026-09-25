@@ -1,0 +1,22 @@
+# ClearShift lapse-risk batch scoring → gate.lapse_risk
+# captured 2026-09-25 15:18 CDT  |  cmd: python model/score_batch.py
+
+trained local model on 4000 synthetic observations (local-gbc-sklearn:4000rows)
+
+scored 23 (worker, qualification) pairs; model_version=local-gbc-sklearn:4000rows
+highest lapse risk:
+employee_id qualification_id  days_to_expiry  prior_lapse_count  training_backlog  lapse_risk
+      40120         HOT_WORK             -12                  1                 0      0.5905
+      40121     CRANE_SIGNAL              45                  0                 0      0.3795
+      40119         HOT_WORK             130                  0                 0      0.0498
+      40119       RESPIRATOR             335                  0                 0      0.0432
+      40123       RESPIRATOR             305                  0                 0      0.0432
+      40210     FALL_PROTECT             330                  0                 0      0.0432
+      40121       RESPIRATOR             245                  0                 0      0.0432
+      40210         HOT_WORK             230                  0                 0      0.0432
+      40121   CONFINED_SPACE             165                  0                 0      0.0432
+      40119             LOTO             430                  0                 0      0.0432
+      40119   CONFINED_SPACE             356                  0                 0      0.0432
+      40118         HOT_WORK             330                  0                 0      0.0432
+
+mean predicted lapse risk: 0.075

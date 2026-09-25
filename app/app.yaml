@@ -16,6 +16,11 @@ env:
   value: gate
 - name: LAKEBASE_ENDPOINT
   value: projects/clearshift/branches/production/endpoints/primary
+# Genie space over the ClearShift gold tables. The app service principal needs
+# CAN RUN on this space. GENIE_PROFILE is unset here: on Apps the SP
+# authenticates from the environment; it is only used for local runs.
+- name: GENIE_SPACE_ID
+  value: set-per-environment
 # Opening viewer scope. A real deployment derives this from the authenticated
 # principal; here it selects which access scope the application opens in.
 - name: DEFAULT_PRINCIPAL

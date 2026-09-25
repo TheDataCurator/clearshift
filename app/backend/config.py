@@ -34,6 +34,17 @@ LAKEBASE_ENDPOINT = os.getenv(
 )
 
 # ---------------------------------------------------------------------------
+# Genie
+# ---------------------------------------------------------------------------
+# The Genie space over the ClearShift gold tables. When set, the assistant can
+# hand a natural-language question to Genie and return the SQL it ran. When
+# empty, the assistant answers from the governed intents only.
+GENIE_SPACE_ID = os.getenv("GENIE_SPACE_ID", "")
+# CLI profile for local runs. In Databricks Apps the app service principal
+# authenticates from the environment, so this stays empty there.
+GENIE_PROFILE = os.getenv("GENIE_PROFILE", "")
+
+# ---------------------------------------------------------------------------
 # Demo behavior
 # ---------------------------------------------------------------------------
 # Which viewer scope the UI opens as. Real deployments derive this from the

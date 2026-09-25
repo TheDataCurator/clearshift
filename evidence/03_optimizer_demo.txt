@@ -1,0 +1,9 @@
+# ClearShift CP-SAT crew optimizer — standalone scenario
+# captured 2026-09-25 15:18 CDT  |  cmd: python model/optimizer.py
+
+solver status: OPTIMAL
+assignments:
+    J1 @ Peoria (LOTO) -> W2  risk=0.15
+    J2 @ Peoria (CONFINED) -> W3  risk=0.4
+    J3 @ Peoria (PIT) -> W4  risk=0.3
+uncovered (cannot compliantly staff): ['J4']

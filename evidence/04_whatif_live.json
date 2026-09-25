@@ -1,0 +1,336 @@
+# ClearShift What-if studio — live integrated run (Lakebase views + persisted model scores + CP-SAT)
+# captured 2026-09-25 15:18 CDT  |  GET /api/whatif/scenario then POST /api/whatif/solve  |  principal manager.whitlock
+
+== SCENARIO (inputs the optimizer solves) ==
+{
+    "principal": "manager.whitlock",
+    "work_date": "2026-09-26",
+    "seat_count": 7,
+    "worker_count": 7,
+    "current": {
+        "cleared": 2,
+        "exposed": 5,
+        "seats": 7
+    },
+    "seats": [
+        {
+            "job_id": "14308011-399-3019-19350|40122",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "BAY OPERATIONS - MATERIALS",
+            "scheduled_id": "40122",
+            "scheduled_name": "Hollis Nakamura",
+            "required_quals": [
+                "POWERED_TRUCK"
+            ],
+            "qualification_names": [
+                "Powered Industrial Truck"
+            ],
+            "current_clearance": "NOT_CLEARED",
+            "current_reason": "Powered Industrial Truck is authorized for Grand Rapids MI - Plant 2401, not Peoria IL - Plant 3081",
+            "first_time_regulated": false,
+            "qualification": "Powered Industrial Truck"
+        },
+        {
+            "job_id": "14309011-000-0822-5608|40118",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "BURN DEPT",
+            "scheduled_id": "40118",
+            "scheduled_name": "Marcus Ellery",
+            "required_quals": [
+                "LOTO",
+                "HOT_WORK",
+                "CONFINED_SPACE",
+                "RESPIRATOR"
+            ],
+            "qualification_names": [
+                "Respiratory Protection",
+                "Lockout / Tagout",
+                "Hot Work / Welding",
+                "Confined Space Entry"
+            ],
+            "current_clearance": "NOT_CLEARED",
+            "current_reason": "No record of Respiratory Protection",
+            "first_time_regulated": false,
+            "qualification": "Confined Space Entry + Hot Work / Welding + Lockout / Tagout + Respiratory Protection"
+        },
+        {
+            "job_id": "14309011-000-0822-5608|40119",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "BURN DEPT",
+            "scheduled_id": "40119",
+            "scheduled_name": "Danielle Okafor",
+            "required_quals": [
+                "LOTO",
+                "HOT_WORK",
+                "CONFINED_SPACE",
+                "RESPIRATOR"
+            ],
+            "qualification_names": [
+                "Hot Work / Welding",
+                "Confined Space Entry",
+                "Respiratory Protection",
+                "Lockout / Tagout"
+            ],
+            "current_clearance": "SUPERVISION_REQUIRED",
+            "current_reason": "First time performing Confined Space Entry, in BURN DEPT. Supervised performance required.",
+            "first_time_regulated": true,
+            "qualification": "Confined Space Entry + Hot Work / Welding + Lockout / Tagout + Respiratory Protection"
+        },
+        {
+            "job_id": "14308011-999-9019-19942|40124",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "INDIRECT - TOOLING - FIXTURING",
+            "scheduled_id": "40124",
+            "scheduled_name": "Rafael Ibarra",
+            "required_quals": [
+                "CRANE_SIGNAL",
+                "LOTO"
+            ],
+            "qualification_names": [
+                "Crane and Hoist Signalling",
+                "Lockout / Tagout"
+            ],
+            "current_clearance": "CLEARED",
+            "current_reason": null,
+            "first_time_regulated": false,
+            "qualification": "Crane and Hoist Signalling + Lockout / Tagout"
+        },
+        {
+            "job_id": "14317061-000-0106-1061|40120",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "PLASMA TABLE",
+            "scheduled_id": "40120",
+            "scheduled_name": "Trent Boland",
+            "required_quals": [
+                "FALL_PROTECT",
+                "HOT_WORK"
+            ],
+            "qualification_names": [
+                "Hot Work / Welding",
+                "Fall Protection"
+            ],
+            "current_clearance": "NOT_CLEARED",
+            "current_reason": "Hot Work / Welding lapsed 12 days ago",
+            "first_time_regulated": false,
+            "qualification": "Fall Protection + Hot Work / Welding"
+        },
+        {
+            "job_id": "14309011-000-0852-5608|40123",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "SPIN DEPT",
+            "scheduled_id": "40123",
+            "scheduled_name": "Simone Adebayo",
+            "required_quals": [
+                "BLAST_COATING",
+                "RESPIRATOR"
+            ],
+            "qualification_names": [
+                "Abrasive Blast and Coating",
+                "Respiratory Protection"
+            ],
+            "current_clearance": "NOT_CLEARED",
+            "current_reason": "Abrasive Blast and Coating revoked: Procedure violation, pending requalification",
+            "first_time_regulated": false,
+            "qualification": "Abrasive Blast and Coating + Respiratory Protection"
+        },
+        {
+            "job_id": "14317015-001-0026-516|40125",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "STOCKROOM- SHIPPING- RECEIVING",
+            "scheduled_id": "40125",
+            "scheduled_name": "Yvette Coleridge",
+            "required_quals": [
+                "POWERED_TRUCK"
+            ],
+            "qualification_names": [
+                "Powered Industrial Truck"
+            ],
+            "current_clearance": "CLEARED",
+            "current_reason": null,
+            "first_time_regulated": false,
+            "qualification": "Powered Industrial Truck"
+        }
+    ],
+    "workers": [
+        {
+            "employee_id": "40121",
+            "employee_name": "Priya Raman",
+            "qualifications": [
+                "CONFINED_SPACE",
+                "CRANE_SIGNAL",
+                "LOTO",
+                "RESPIRATOR"
+            ],
+            "lapse_risk": 0.38,
+            "can_supervise": false
+        },
+        {
+            "employee_id": "40119",
+            "employee_name": "Danielle Okafor",
+            "qualifications": [
+                "CONFINED_SPACE",
+                "FALL_PROTECT",
+                "HOT_WORK",
+                "LOTO",
+                "RESPIRATOR"
+            ],
+            "lapse_risk": 0.05,
+            "can_supervise": false
+        },
+        {
+            "employee_id": "40118",
+            "employee_name": "Marcus Ellery",
+            "qualifications": [
+                "FALL_PROTECT",
+                "HOT_WORK",
+                "LOTO"
+            ],
+            "lapse_risk": 0.04,
+            "can_supervise": false
+        },
+        {
+            "employee_id": "40123",
+            "employee_name": "Simone Adebayo",
+            "qualifications": [
+                "RESPIRATOR"
+            ],
+            "lapse_risk": 0.04,
+            "can_supervise": false
+        },
+        {
+            "employee_id": "40120",
+            "employee_name": "Trent Boland",
+            "qualifications": [
+                "FALL_PROTECT"
+            ],
+            "lapse_risk": 0.03,
+            "can_supervise": false
+        },
+        {
+            "employee_id": "40124",
+            "employee_name": "Rafael Ibarra",
+            "qualifications": [
+                "CRANE_SIGNAL",
+                "LOTO"
+            ],
+            "lapse_risk": 0.03,
+            "can_supervise": false
+        },
+        {
+            "employee_id": "40125",
+            "employee_name": "Yvette Coleridge",
+            "qualifications": [
+                "POWERED_TRUCK"
+            ],
+            "lapse_risk": 0.03,
+            "can_supervise": false
+        }
+    ]
+}
+
+== SOLVE (the compliant plan) ==
+{
+    "principal": "manager.whitlock",
+    "work_date": "2026-09-26",
+    "status": "OPTIMAL",
+    "current": {
+        "cleared": 2,
+        "exposed": 5,
+        "seats": 7
+    },
+    "summary": {
+        "seats": 7,
+        "covered": 4,
+        "uncovered": 3,
+        "exposure_cleared": 2,
+        "total_assigned_lapse_risk": 0.15
+    },
+    "assignments": [
+        {
+            "job_id": "14309011-000-0822-5608|40118",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "BURN DEPT",
+            "qualification": "Confined Space Entry + Hot Work / Welding + Lockout / Tagout + Respiratory Protection",
+            "first_time_regulated": false,
+            "scheduled_id": "40118",
+            "scheduled_name": "Marcus Ellery",
+            "current_clearance": "NOT_CLEARED",
+            "assigned_id": "40119",
+            "assigned_name": "Danielle Okafor",
+            "assigned_lapse_risk": 0.05,
+            "reassigned_from_scheduled": true
+        },
+        {
+            "job_id": "14317061-000-0106-1061|40120",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "PLASMA TABLE",
+            "qualification": "Fall Protection + Hot Work / Welding",
+            "first_time_regulated": false,
+            "scheduled_id": "40120",
+            "scheduled_name": "Trent Boland",
+            "current_clearance": "NOT_CLEARED",
+            "assigned_id": "40118",
+            "assigned_name": "Marcus Ellery",
+            "assigned_lapse_risk": 0.04,
+            "reassigned_from_scheduled": true
+        },
+        {
+            "job_id": "14308011-999-9019-19942|40124",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "INDIRECT - TOOLING - FIXTURING",
+            "qualification": "Crane and Hoist Signalling + Lockout / Tagout",
+            "first_time_regulated": false,
+            "scheduled_id": "40124",
+            "scheduled_name": "Rafael Ibarra",
+            "current_clearance": "CLEARED",
+            "assigned_id": "40124",
+            "assigned_name": "Rafael Ibarra",
+            "assigned_lapse_risk": 0.03,
+            "reassigned_from_scheduled": false
+        },
+        {
+            "job_id": "14317015-001-0026-516|40125",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "STOCKROOM- SHIPPING- RECEIVING",
+            "qualification": "Powered Industrial Truck",
+            "first_time_regulated": false,
+            "scheduled_id": "40125",
+            "scheduled_name": "Yvette Coleridge",
+            "current_clearance": "CLEARED",
+            "assigned_id": "40125",
+            "assigned_name": "Yvette Coleridge",
+            "assigned_lapse_risk": 0.03,
+            "reassigned_from_scheduled": false
+        }
+    ],
+    "uncovered": [
+        {
+            "job_id": "14308011-399-3019-19350|40122",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "BAY OPERATIONS - MATERIALS",
+            "qualification": "Powered Industrial Truck",
+            "scheduled_name": "Hollis Nakamura",
+            "current_clearance": "NOT_CLEARED",
+            "reason": "Qualified capacity is fully committed to other regulated seats this shift."
+        },
+        {
+            "job_id": "14309011-000-0822-5608|40119",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "BURN DEPT",
+            "qualification": "Confined Space Entry + Hot Work / Welding + Lockout / Tagout + Respiratory Protection",
+            "scheduled_name": "Danielle Okafor",
+            "current_clearance": "SUPERVISION_REQUIRED",
+            "reason": "First-time regulated work needs a qualified supervisor present; none available at Peoria IL - Plant 3081."
+        },
+        {
+            "job_id": "14309011-000-0852-5608|40123",
+            "plant": "Peoria IL - Plant 3081",
+            "work_center": "SPIN DEPT",
+            "qualification": "Abrasive Blast and Coating + Respiratory Protection",
+            "scheduled_name": "Simone Adebayo",
+            "current_clearance": "NOT_CLEARED",
+            "reason": "No worker holds the full requirement (Abrasive Blast and Coating + Respiratory Protection) for SPIN DEPT at Peoria IL - Plant 3081."
+        }
+    ],
+    "note": "Scores are the persisted output of the lapse-risk model (gate.lapse_risk). The plan is solved live with CP-SAT; hard compliance rules are constraints, never traded off."
+}

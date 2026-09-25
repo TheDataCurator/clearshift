@@ -21,7 +21,7 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Body, Query
 
-from backend import config, db
+from backend import config, db, genie
 
 router = APIRouter(prefix="/api/ask", tags=["ask"])
 
@@ -487,19 +487,12 @@ def route(q: str, principal: str) -> dict:
 
 @router.get("/suggestions")
 def suggestions():
-    return {"suggestions": SUGGESTIONS}
+    return {"suggestions": SUGGESTIONS, "genie_available": genie.enabled()}
 
 
-@router.post("")
-def ask(payload: dict = Body(...)):
-    q = (payload.get("question") or "").strip()
-    principal = payload.get("principal") or config.DEFAULT_PRINCIPAL
-    if not q:
-        return {"answer": "Ask a question about qualification, coverage or exposure.", "rows": []}
-
+def _governed(q: str, principal: str) -> dict:
     result = route(q, principal)
-    result["question"] = q
-    result["principal"] = principal
+    result["engine"] = "governed"
     result["sources"] = [
         "gate.v_shift_clearance",
         "gate.v_site_roster",
@@ -509,4 +502,30 @@ def ask(payload: dict = Body(...)):
         "gate.v_learning_assignment",
         "gate.v_team_compliance",
     ]
+    return result
+
+
+@router.post("")
+def ask(payload: dict = Body(...)):
+    q = (payload.get("question") or "").strip()
+    principal = payload.get("principal") or config.DEFAULT_PRINCIPAL
+    engine = (payload.get("engine") or "governed").lower()
+    if not q:
+        return {"answer": "Ask a question about qualification, coverage or exposure.", "rows": []}
+
+    # Genie widens the question surface over the same gold tables and returns the
+    # SQL it ran. If it is unavailable or errors, the governed intents answer, so
+    # the assistant never goes silent.
+    if engine == "genie" and genie.enabled():
+        try:
+            result = genie.ask(q)
+        except Exception as exc:  # noqa: BLE001
+            result = _governed(q, principal)
+            result["genie_error"] = str(exc)
+            result["engine"] = "governed"
+    else:
+        result = _governed(q, principal)
+
+    result["question"] = q
+    result["principal"] = principal
     return result

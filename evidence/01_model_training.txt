@@ -1,0 +1,16 @@
+# ClearShift lapse-risk model — local training run
+# captured 2026-09-25 15:18 CDT  |  cmd: python model/train.py
+
+2026/09/25 15:18:16 WARNING mlflow.sklearn: Saving scikit-learn models in the pickle or cloudpickle format requires exercising caution because these formats rely on Python's object serialization mechanism, which can execute arbitrary code during deserialization. The recommended safe alternative is the 'skops' format. For more information, see: https://scikit-learn.org/stable/model_persistence.html
+model flavor: sklearn_gbm
+ROC AUC: 0.878   precision: 0.875   recall: 0.722   F1: 0.791
+confusion matrix [[tn fp][fn tp]]: [[690, 29], [78, 203]]
+feature importances (desc):
+    days_to_expiry               0.839
+    proactive_renewal_behavior   0.078
+    training_backlog             0.029
+    prior_lapse_count            0.021
+    schedule_pressure            0.017
+    total_certs_held             0.014
+    is_regulated                 0.002
+logged to local MLflow (model/mlruns); no workspace contact

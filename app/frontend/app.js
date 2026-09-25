@@ -761,6 +761,94 @@ async function loadCoverage() {
 
   document.querySelectorAll('#ov-opportunity button.request').forEach((b) =>
     b.addEventListener('click', () => sendCredentialingRequest(b)));
+
+  initWhatif();
+}
+
+// -------------------------------------------------------------- what-if studio
+
+/* The decisioning layer, surfaced. The scenario shows tomorrow's regulated seats
+ * and the qualified pool with their model lapse-risk. Solving runs the optimizer
+ * live and returns a compliant plan plus the seats it cannot staff and why. */
+
+const WI_CLEAR = {
+  NOT_CLEARED:          { cls: 'stop',    word: 'Not cleared' },
+  SUPERVISION_REQUIRED: { cls: 'caution', word: 'First performance' },
+  CLEARED_EXPIRING:     { cls: 'watch',   word: 'Expiring' },
+  CLEARED:              { cls: 'go',      word: 'Cleared' },
+};
+
+function riskPill(r) {
+  const cls = r >= 0.3 ? 'stop' : r >= 0.1 ? 'caution' : 'go';
+  return `<span class="pill ${cls}">lapse risk ${r.toFixed(2)}</span>`;
+}
+
+async function initWhatif() {
+  const d = await api(`/api/whatif/scenario?principal=${encodeURIComponent(principal)}`);
+  window._wi = d;
+  document.getElementById('wi-tiles').innerHTML =
+      tile('watch', d.current.seats,   'Regulated seats tomorrow')
+    + tile('stop',  d.current.exposed, 'Exposed under the current schedule')
+    + tile('go',    d.worker_count,    'Qualified workers in the pool');
+  document.getElementById('wi-status').textContent =
+    `${d.seat_count} seats, ${d.worker_count} qualified workers in scope for ${d.work_date}.`;
+  document.getElementById('wi-plan').innerHTML = '';
+  document.getElementById('wi-uncovered').innerHTML = '';
+  const btn = document.getElementById('wi-solve');
+  btn.disabled = d.seat_count === 0;
+  btn.onclick = solveWhatif;
+}
+
+async function solveWhatif() {
+  const btn = document.getElementById('wi-solve');
+  btn.disabled = true;
+  document.getElementById('wi-status').textContent = 'Solving with CP-SAT…';
+  try {
+    const d = await api('/api/whatif/solve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ principal }),
+    });
+    const s = d.summary;
+    document.getElementById('wi-tiles').innerHTML =
+        tile('go',      s.covered,          'Seats compliantly staffed')
+      + tile('caution', s.exposure_cleared, 'Exposed seats now cleared')
+      + tile('stop',    s.uncovered,        'Cannot staff compliantly');
+    document.getElementById('wi-status').textContent =
+      `${d.status} · total assigned lapse risk ${s.total_assigned_lapse_risk}. `
+      + 'Hard compliance rules are constraints, never traded off.';
+
+    document.getElementById('wi-plan').innerHTML =
+      `<div class="wi-h">The plan</div>`
+      + d.assignments.map((a) => `
+        <div class="cover-row">
+          <span class="pill ${a.reassigned_from_scheduled ? 'caution' : 'go'}">
+            ${a.reassigned_from_scheduled ? 're-planned' : 'on schedule'}</span>
+          <span class="qn"><b>${esc(a.assigned_name)}</b>
+            <div class="loc">${esc(a.work_center)} · ${esc(a.qualification)}</div>
+            ${a.reassigned_from_scheduled
+              ? `<div class="loc">was ${esc(a.scheduled_name)} — ${esc(WI_CLEAR[a.current_clearance]?.word || a.current_clearance)}</div>`
+              : ''}
+          </span>
+          <span>${riskPill(a.assigned_lapse_risk)}</span>
+        </div>`).join('');
+
+    document.getElementById('wi-uncovered').innerHTML = d.uncovered.length
+      ? `<div class="wi-h wi-h-stop">Still exposed — act before the shift</div>`
+        + d.uncovered.map((u) => `
+          <div class="cover-row">
+            <span class="pill ${WI_CLEAR[u.current_clearance]?.cls || 'stop'}">
+              ${esc(WI_CLEAR[u.current_clearance]?.word || u.current_clearance)}</span>
+            <span class="qn"><b>${esc(u.work_center)}</b>
+              <div class="loc">${esc(u.qualification)}</div>
+              <div class="loc">${esc(u.reason)}</div></span>
+          </div>`).join('')
+      : `<p class="empty">Every regulated seat can be compliantly staffed.</p>`;
+  } catch (e) {
+    document.getElementById('wi-status').textContent = `Solve failed: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ------------------------------------------------------------------ osha view
@@ -1658,7 +1746,7 @@ function loadHome() {
 
 // ------------------------------------------------------------------- ask
 
-const askState = { started: false };
+const askState = { started: false, engine: 'governed' };
 
 function bubble(role, html) {
   return `<div class="msg ${role}">
@@ -1679,12 +1767,26 @@ async function askSend(q) {
     const r = await api('/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q, principal }),
+      body: JSON.stringify({ question: q, principal, engine: askState.engine }),
     });
+    let extra = '';
+    if (r.engine === 'genie') {
+      // Genie returns the SQL it ran, so the answer is inspectable.
+      if (r.sql) {
+        const tbl = (r.columns && r.columns.length && r.rows && r.rows.length)
+          ? `<table class="genie-tbl"><thead><tr>${r.columns.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>`
+            + `<tbody>${r.rows.slice(0, 8).map((row) => `<tr>${row.map((v) => `<td>${esc(v ?? '—')}</td>`).join('')}</tr>`).join('')}</tbody></table>`
+          : '';
+        extra = `<details class="genie-sql"><summary>SQL Genie ran${r.row_count ? ` · ${r.row_count} rows` : ''}</summary>`
+          + `<pre>${esc(r.sql)}</pre>${tbl}</details>`;
+      }
+    }
     const jump = r.view
       ? `<button class="jump" data-goto="${esc(r.view)}">Open ${esc(VIEW_LABEL[r.view] || r.view)} →</button>`
       : '';
-    pending.querySelector('.bubble').innerHTML = esc(r.answer) + jump;
+    const fell = r.genie_error
+      ? `<div class="genie-fallback">Genie unavailable; answered from governed queries.</div>` : '';
+    pending.querySelector('.bubble').innerHTML = esc(r.answer) + fell + extra + jump;
     pending.querySelectorAll('[data-goto]').forEach((b) =>
       b.addEventListener('click', () => show(b.dataset.goto)));
   } catch (e) {
@@ -1706,11 +1808,30 @@ async function loadAsk() {
       'Ask about tomorrow’s exposure, site audit readiness, thin cover, or who is one '
       + 'credential away from closing a gap. Answers are limited to your scope.');
 
-    const { suggestions } = await api('/api/ask/suggestions');
+    const { suggestions, genie_available } = await api('/api/ask/suggestions');
     document.getElementById('ask-suggest').innerHTML =
       suggestions.map((s) => `<button class="sugg">${esc(s)}</button>`).join('');
     document.querySelectorAll('#ask-suggest .sugg').forEach((b) =>
       b.addEventListener('click', () => askSend(b.textContent)));
+
+    // Engine toggle: governed intents (always) or Genie over the gold tables.
+    const mode = document.getElementById('asst-mode');
+    if (genie_available && mode) {
+      const setEngine = (eng) => {
+        askState.engine = eng;
+        mode.textContent = eng === 'genie' ? 'Genie · gold tables' : 'governed SQL';
+        document.querySelectorAll('#ask-engine button').forEach((x) =>
+          x.classList.toggle('on', x.dataset.eng === eng));
+      };
+      const bar = document.createElement('div');
+      bar.id = 'ask-engine';
+      bar.innerHTML = `<span>Answer with</span>`
+        + `<button data-eng="governed" class="on">Governed queries</button>`
+        + `<button data-eng="genie">Genie</button>`;
+      document.getElementById('ask-suggest').before(bar);
+      bar.querySelectorAll('button').forEach((b) =>
+        b.addEventListener('click', () => setEngine(b.dataset.eng)));
+    }
 
     document.getElementById('ask-sources').innerHTML =
       '<span>Grounded in</span>'
