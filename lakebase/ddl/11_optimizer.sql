@@ -24,17 +24,28 @@
 -- as the natural gold-layer addition. Held certifications only (not revoked).
 
 CREATE OR REPLACE VIEW gate.v_lapse_risk_features AS
-WITH holdings AS (
+WITH per_cert AS (
+    -- One row per (worker, certification): the current expiry drives days_to_expiry.
     SELECT
         eq.employee_id,
         eq.qualification_id,
-        max(eq.expires_on)                                              AS current_expires_on,
-        count(*)                                                        AS total_certs_held,
+        max(eq.expires_on) AS current_expires_on
+    FROM gate.employee_qualification eq
+    WHERE eq.revoked_on IS NULL
+    GROUP BY eq.employee_id, eq.qualification_id
+),
+worker_totals AS (
+    -- Worker-level engagement and lapse history. These are properties of the
+    -- worker, not of one certification, and the model was trained on worker-level
+    -- values, so they are aggregated per worker to avoid train/serve skew.
+    SELECT
+        eq.employee_id,
+        count(DISTINCT eq.qualification_id)                             AS total_certs_held,
         sum(CASE WHEN eq.expires_on IS NOT NULL
                   AND eq.expires_on < current_date THEN 1 ELSE 0 END)   AS prior_lapse_count
     FROM gate.employee_qualification eq
     WHERE eq.revoked_on IS NULL
-    GROUP BY eq.employee_id, eq.qualification_id
+    GROUP BY eq.employee_id
 ),
 training_backlog AS (
     SELECT te.employee_id, count(*) AS open_training_count
@@ -71,23 +82,24 @@ proactive AS (
     GROUP BY employee_id
 )
 SELECT
-    h.employee_id,
-    h.qualification_id,
+    pc.employee_id,
+    pc.qualification_id,
     e.locationname                                                      AS location,
     q.is_regulated,
     q.requires_supervised_first_performance,
-    (h.current_expires_on - current_date)                               AS days_to_expiry,
-    h.prior_lapse_count,
-    h.total_certs_held,
+    (pc.current_expires_on - current_date)                              AS days_to_expiry,
+    wt.prior_lapse_count,
+    wt.total_certs_held,
     COALESCE(tb.open_training_count, 0)                                 AS training_backlog,
     COALESCE(sp.scheduled_shifts_next_14d, 0)                           AS schedule_pressure,
     ROUND(COALESCE(pr.proactive_renewal_behavior, 0.5)::numeric, 3)     AS proactive_renewal_behavior
-FROM holdings h
-JOIN gate.hr_employee e     ON e.id = h.employee_id
-JOIN gate.qualification q   ON q.qualification_id = h.qualification_id
-LEFT JOIN training_backlog tb ON tb.employee_id = h.employee_id
-LEFT JOIN schedule_pressure sp ON sp.employee_id = h.employee_id
-LEFT JOIN proactive pr         ON pr.employee_id = h.employee_id;
+FROM per_cert pc
+JOIN worker_totals wt       ON wt.employee_id = pc.employee_id
+JOIN gate.hr_employee e     ON e.id = pc.employee_id
+JOIN gate.qualification q   ON q.qualification_id = pc.qualification_id
+LEFT JOIN training_backlog tb ON tb.employee_id = pc.employee_id
+LEFT JOIN schedule_pressure sp ON sp.employee_id = pc.employee_id
+LEFT JOIN proactive pr         ON pr.employee_id = pc.employee_id;
 
 
 -- --- Persisted model output -----------------------------------------------

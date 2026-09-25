@@ -344,15 +344,27 @@ def credential_card(employee_id: str, principal: str = Query(default=None)):
 
 @router.get("/roster-lookup")
 def roster_lookup(principal: str = Query(default=None)):
-    """Names an inspector can pick from, within scope."""
+    """Names an inspector can pick from, within scope.
+
+    Workers who currently hold a regulated credential are listed first, so the
+    default selection lands on someone with a card to show rather than an office
+    supervisor with none.
+    """
     principal = principal or config.DEFAULT_PRINCIPAL
     predicate, params = db.scope_clause(principal)
     return db.query(
         f"""
-        SELECT employee_id, employee_name, job_description, department, audit_status
-          FROM gate.v_training_matrix
+        SELECT tm.employee_id, tm.employee_name, tm.job_description, tm.department,
+               tm.audit_status, COALESCE(rc.regulated_held, 0) AS regulated_held
+          FROM gate.v_training_matrix tm
+          LEFT JOIN (
+              SELECT employee_id, count(*) AS regulated_held
+                FROM gate.v_qualification_state
+               WHERE is_regulated AND state IN ('CURRENT', 'EXPIRING')
+               GROUP BY employee_id
+          ) rc ON rc.employee_id = tm.employee_id
          WHERE {predicate}
-         ORDER BY employee_name
+         ORDER BY (COALESCE(rc.regulated_held, 0) > 0) DESC, tm.employee_name
         """,
         params,
     )

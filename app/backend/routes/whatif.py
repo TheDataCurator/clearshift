@@ -31,16 +31,14 @@ FIRST_PERF_CLEARANCE = "SUPERVISION_REQUIRED"
 _SEVERITY = {"NOT_CLEARED": 3, "SUPERVISION_REQUIRED": 2, "CLEARED_EXPIRING": 1, "CLEARED": 0}
 
 
-def _worst(a: str, b: str) -> str:
-    return a if _SEVERITY.get(a, 0) >= _SEVERITY.get(b, 0) else b
-
-
 def _scenario(principal: str, work_date: date, exclude: set[str]):
     """Assemble optimizer inputs from the governed views.
 
-    Returns (jobs, workers, job_meta, current_counts). A job is one scheduled
-    (worker, work center) seat carrying the set of regulated qualifications it
-    demands. job_meta carries display detail and the current verdict per seat.
+    Returns (jobs, workers, job_meta, current_counts, names). A job is one
+    scheduled (worker, work center) seat carrying the set of regulated
+    qualifications it demands. job_meta carries display detail and the current
+    verdict per seat. names maps every pool worker id to their display name, so
+    callers need not re-query it.
     """
     predicate, params = db.scope_clause(principal)
     params["d"] = work_date
@@ -99,7 +97,7 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
             current_counts["cleared"] += 1
 
     if not jobs:
-        return jobs, [], job_meta, current_counts
+        return jobs, [], job_meta, current_counts, {}
 
     # Worker pool: everyone at the demanded plants holding a regulated
     # qualification in scope, with what they can supervise and the persisted
@@ -152,19 +150,15 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
             can_supervise=frozenset(w["quals"]) if w["is_supervisory"] else frozenset(),
         ))
 
-    return jobs, workers, job_meta, current_counts
+    names = {wid: w["employee_name"] for wid, w in by_worker.items()}
+    return jobs, workers, job_meta, current_counts, names
 
 
 @router.get("/scenario")
 def scenario(principal: str = Query(default=None), work_date: date | None = Query(default=None)):
     principal = principal or config.DEFAULT_PRINCIPAL
     d = work_date or (date.today() + timedelta(days=1))
-    jobs, workers, job_meta, counts = _scenario(principal, d, set())
-    names = {}
-    if workers:
-        names = {r["id"]: r["name"] for r in db.query(
-            "SELECT id, name FROM gate.hr_employee WHERE id = ANY(%(ids)s)",
-            {"ids": [w.worker_id for w in workers]})}
+    jobs, workers, job_meta, counts, names = _scenario(principal, d, set())
     return {
         "principal": principal, "work_date": d,
         "seat_count": len(jobs), "worker_count": len(workers), "current": counts,
@@ -186,15 +180,11 @@ def solve(payload: dict = Body(default={})):
     exclude = set(payload.get("exclude_workers") or [])
     risk_weight = int(payload.get("risk_weight") or 1000)
 
-    jobs, workers, job_meta, counts = _scenario(principal, d, exclude)
+    jobs, workers, job_meta, counts, names = _scenario(principal, d, exclude)
     if not jobs:
         return {"principal": principal, "work_date": d, "status": "NO_JOBS",
                 "message": "No regulated shift demand in scope for this date.",
                 "current": counts, "assignments": [], "uncovered": []}
-
-    names = {r["id"]: r["name"] for r in db.query(
-        "SELECT id, name FROM gate.hr_employee WHERE id = ANY(%(ids)s)",
-        {"ids": [w.worker_id for w in workers]})} if workers else {}
 
     result = assign(jobs, workers, risk_weight=risk_weight)
 

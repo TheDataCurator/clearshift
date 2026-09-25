@@ -118,6 +118,11 @@ def main() -> None:
 
     X = feats[FEATURES].copy()
     X["is_regulated"] = X["is_regulated"].astype(int)
+    # A non-expiring certification has no expiry date, so days_to_expiry is NULL.
+    # It is effectively far from expiry, so impute a large horizon rather than
+    # letting NaN reach the estimator (sklearn GBM rejects NaN).
+    X["days_to_expiry"] = X["days_to_expiry"].fillna(3650)
+    X = X.fillna(0)
     feats["lapse_risk"] = np.round(_predict(model, X.astype(float)), 4)
 
     rows = list(feats[["employee_id", "qualification_id", "lapse_risk"]].itertuples(index=False, name=None))

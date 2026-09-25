@@ -80,32 +80,38 @@ def assign(jobs, workers, risk_weight: int = 1000):
         else:
             m.Add(covered[j.job_id] == 0)  # nobody eligible: cannot cover
 
-    # no double-booking: a worker takes at most one shift
-    for w in workers:
-        w_vars = [x[(j.job_id, w.worker_id)] for j in jobs
-                  if (j.job_id, w.worker_id) in x]
-        if w_vars:
-            m.Add(sum(w_vars) <= 1)
-
-    # supervisor rule: a covered first-time regulated shift needs a qualified
-    # supervisor present at the plant who is not the performer. A supervisor
-    # qualifies if they can supervise at least one of the shift's requirements.
+    # supervisor rule: a covered first-time regulated shift needs one qualified
+    # supervisor present at the plant. A supervisor qualifies if they can
+    # supervise at least one of the shift's requirements. Supervision is a named
+    # assignment, not a free boolean, so a supervisor cannot cover two shifts at
+    # once and cannot also be performing elsewhere.
+    sup = {}
     for j in jobs:
         if not j.first_time_regulated:
             continue
-        sup_terms = []
         for w in workers:
             if w.plant == j.plant and (w.can_supervise & j.reqs()):
-                s = m.NewBoolVar(f"sup_{j.job_id}_{w.worker_id}")
-                # a supervisor cannot also be the performer of the same shift
-                if (j.job_id, w.worker_id) in x:
-                    m.Add(s + x[(j.job_id, w.worker_id)] <= 1)
-                sup_terms.append(s)
-        # if covered, at least one supervisor must be present
-        if sup_terms:
-            m.Add(sum(sup_terms) >= covered[j.job_id])
+                sup[(j.job_id, w.worker_id)] = m.NewBoolVar(f"sup_{j.job_id}_{w.worker_id}")
+
+    for j in jobs:
+        if not j.first_time_regulated:
+            continue
+        sterms = [sup[(j.job_id, w.worker_id)] for w in workers
+                  if (j.job_id, w.worker_id) in sup]
+        if sterms:
+            # exactly one supervisor when the shift is covered, none otherwise
+            m.Add(sum(sterms) == covered[j.job_id])
         else:
             m.Add(covered[j.job_id] == 0)  # no eligible supervisor: cannot cover
+
+    # no double-booking: a worker takes at most one commitment in the horizon,
+    # whether performing a shift or supervising one. This is what stops a single
+    # supervisor from being counted on two first-time shifts at the same time.
+    for w in workers:
+        commits = [x[k] for k in x if k[1] == w.worker_id] \
+                + [sup[k] for k in sup if k[1] == w.worker_id]
+        if commits:
+            m.Add(sum(commits) <= 1)
 
     # objective: maximize coverage first, then prefer low-risk assignments
     risk = {w.worker_id: int(round(w.lapse_risk * 100)) for w in workers}
