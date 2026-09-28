@@ -1,157 +1,97 @@
-# ClearShift
-### No one performs regulated work without proven qualification.
-Qualification gating, pre-shift safety, and compliant crew planning on Databricks.
+# ClearShift deck
 
-> **Talking points:** ClearShift is a working build on the Databricks Platform for manufacturers with hazardous, regulated work. It answers one question the learning system cannot: is tomorrow's shift compliantly staffed, and if not, what do we do about it before the shift starts.
-
----
-
-## ClearShift closes manufacturing's largest uncontrolled safety exposure, using data you already have, for $275K to $440K a year plus protection against a $1M-plus event.
-
-Your systems record who was *trained*. They cannot tell you who is *cleared to work tomorrow*, so unqualified work reaches the floor and audit readiness is rebuilt by hand. ClearShift closes that gap three ways:
-
-- **Gate it before the shift.** Every scheduled seat is checked against what it requires, so exposure is caught the evening before, not after an incident.
-- **Prove it on demand.** Audit readiness is derived from dated records, cutting 40 hours per plant to minutes.
-- **Plan it intelligently.** A model flags who will lapse and an optimizer staffs a compliant crew from the workforce you already have.
-
-> **Talking points:** This is the whole story on one slide. Situation: only qualified people may do hazardous work. Complication: your systems record training, not tomorrow's clearance. Answer: ClearShift, worth this range annually with catastrophic-risk protection on top. Everything after this slide is evidence for these three points: prevent, prove, plan.
+The canonical, branded deck is the Google Slides presentation, exported to
+`deck/ClearShift_deck.pdf` (the file attached to the FE Bar submission). This
+Markdown mirrors that deck's content and speaker notes as a plain-text record.
+Talking points are the presenter's notes, not on-slide text.
 
 ---
 
-## Your systems record who was trained, not who is cleared to work tomorrow.
-
-- A worker can be scheduled tomorrow into work they are not qualified to perform.
-- The learning system records course completion, not who is cleared to work a seat.
-- Audit readiness is reconstructed by hand, plant by plant, the week an auditor calls.
-- First-time hazardous work slips through without a supervisor present.
-- The gap is invisible until an incident or a citation makes it visible.
-
-> **Talking points:** Every manufacturer with confined space, hot work, or lockout/tagout carries this exposure daily. The data exists, in HR, the scheduler, the LMS, but it is fragmented, so no one can answer the operational question in time to act.
+## 1. ClearShift
+No one performs regulated work without proven qualification.
+Hayley Horn, Sr SA.
 
 ---
 
-## One uncontrolled exposure runs $165K in penalties and over $1M in a fatality event.
+## 2. Safety is a financial control
 
-# $165K
-per willful or repeat OSHA citation (2024 maximum). Serious violations run to $16,550 each.
+- **$167B** — U.S. cost of work injuries a year (National Safety Council)
+- **$165K** — per willful OSHA citation; $16,550 per serious violation
+- **$1M+** — all-in for a single fatality event and its litigation
 
-# >$1M
-all-in for a single confined-space fatality citation and the litigation behind it.
-
-# 40 hrs
-per plant, per audit, spent reconciling rosters by hand today.
-
-> **Talking points:** The average-case value is real: penalties avoided plus audit labor. But the tail risk is what funds this. One prevented confined-space incident dwarfs the cost of the platform. This is a control, not only an efficiency play.
+> **Notes:** The executive stakes. Hazardous work, confined space, hot work, lockout/tagout, is where people get seriously hurt, and qualification is the control that prevents it. Injuries cost U.S. employers about $167 billion a year; a willful OSHA citation runs to $165K; a single fatality event with litigation exceeds $1M. Safety here is a boardroom number, not a checklist. The question is whether you can prove qualification before the work happens.
 
 ---
 
-## ClearShift turns fragmented qualification data into a governed daily control.
+## 3. Trained is not the same as cleared to work
 
-**FOUNDATION** — All qualification, schedule, and requirement data, unified and effective-dated on Databricks.
+- **The gap** — a worker can be scheduled into hazardous work they are not currently qualified to perform.
+- **The blind spot** — data is fragmented across HR, the scheduler, and the LMS, so no one can answer in time.
 
-**GOVERNANCE** — Site and supervisor are the access model. Every answer is scoped and traceable to its source.
-
-**INTELLIGENCE** — A model predicts who will lapse; an optimizer plans a compliant crew; Genie answers in plain language.
-
-> **Talking points:** Same arc as any Databricks data intelligence story: get the foundation right, govern it, then make it intelligent. The difference here is the intelligence makes a compliance decision, not a dashboard.
+> **Notes:** The systems of record capture training completion, not who is cleared to work a seat tomorrow. First-time hazardous work slips through without a supervisor. Because the data is fragmented, the exposure is invisible until an incident or an auditor surfaces it. That is the gap ClearShift closes.
 
 ---
 
-## Every seat is checked the evening before, so exposure never reaches the floor.
+## 4. One governed control closes the gap
 
-- Tomorrow's schedule, checked against what each job and work center requires.
-- One verdict per person: cleared, first performance, or not cleared, with a plain reason.
-- Requirements are effective-dated, so the check reflects what was required on the day.
-- Catches the case a clock-in gate misses: a worker moved mid-shift into work they are not qualified for.
+A single control runs across the day: **Evening** gate the shift (clear or flag), **Shift** compliant crew (optimized from your workforce), **Audit day** prove readiness (on demand). The lapse-risk model feeds the plan.
 
-> **Talking points:** This is the daily driver. A supervisor sees tomorrow's crew before the shift, not after. The reason is in plain language so it is actionable, not a red cell on a spreadsheet.
+> **Notes:** One governed control, across the day. Evening: the schedule is checked against what each seat requires and cleared or flagged before the shift. Shift: an optimizer staffs a compliant crew from the qualified pool, fed by the lapse-risk model. Audit day: readiness is proven on demand from dated records. The next slides show the model, the plan, and Genie in action.
 
 ---
 
-## Audit readiness is proven on demand, cutting 40 hours per plant to minutes.
+## 5. Predict lapses with time to act
 
-- Every regulated requirement at a site, and whether it is currently held.
-- Card serials, trainers, evidence references, ready to spot-check.
-- The answer is derived from dated records, so historical clearance is provable.
+Lapse-risk model feature importance, ROC AUC 0.88. Days to expiry carries most of the signal; behavioral signals (proactive renewal, training backlog, prior lapses) add the early warning.
 
-# From 40 hrs to minutes
-audit roster reconciliation, per plant.
-
-> **Talking points:** When the auditor arrives, the roster is already the answer. No fire drill. This is where the audit-labor savings land, and where a finding becomes a non-event.
+> **Notes:** A rule tells you who already expired. The model predicts who is about to lapse, and why, in time to renew before the shift is exposed. Gradient-boosted, ROC AUC 0.88, on leading signals. Real machine learning, not an expiry lookup.
 
 ---
 
-## A model flags who will lapse before the shift, not after they expire.
+## 6. The optimizer staffs a compliant crew from your workforce, and calls out risk
 
-- A gradient-boosted model scores every worker-certification pair: probability the certification lapses before the next hazardous job.
-- Leading signals: days to expiry, renewal behavior, training backlog, prior lapses, schedule pressure.
-- Measured performance: ROC AUC 0.88. Expiry proximity carries most of the signal; behavior adds the early warning.
+The What-if studio: a CP-SAT optimizer assigns the qualified pool to tomorrow's regulated seats, prefers the lowest-lapse-risk workers, and names the seats it cannot compliantly staff, with the reason.
 
-![Lapse-risk feature importance](images/feature_importance.png)
-
-> **Talking points:** A rule tells you who is already expired. The model tells you who is about to lapse and why, in time to renew before the shift is exposed. This is real machine learning, not an expiry date lookup.
+> **Notes:** This is the decision, not a report. Hard compliance rules are constraints, never traded off: hold every required qualification, supervise every first performance, no double-booking. In the live scenario it clears exposed seats by moving the right people, and names what it cannot staff and why, so you act before the shift.
 
 ---
 
-## The optimizer staffs a compliant crew from your workforce, and names what it cannot.
+## 7. Ask the questions to keep on top of your data
 
-- A CP-SAT optimizer assigns the qualified pool to tomorrow's regulated seats.
-- Hard compliance rules are constraints, never traded off: hold every required qualification, supervise every first performance, no double-booking.
-- Among compliant plans, it prefers workers whose own certification is least likely to lapse.
-- Seats it cannot staff are named, with the reason, so you act before the shift.
+Ask ClearShift with Genie: natural-language questions over the governed gold tables, returning the SQL it ran.
 
-![What-if studio](images/shot_whatif.png)
-
-> **Talking points:** This is the decision, not a report. In the live scenario it clears exposed seats by moving the right qualified people, and it tells you exactly which seats have no compliant answer and why. Scarce low-risk capacity gets spent where it matters.
+> **Notes:** For the questions no one anticipated. Natural language over the same governed gold tables. It returns the SQL it ran, so the answer is inspectable, not taken on trust, and it is scoped to who is asking. Governance does not stop at the dashboard.
 
 ---
 
-## Anyone can ask in plain language and see the exact query behind the answer.
+## 8. Safer floors, clean audits, leaner staffing
 
-- Natural-language questions over the governed gold tables.
-- Returns the SQL it ran, so the answer is inspectable, not taken on trust.
-- Answers within the caller's scope, and declines questions outside the data.
+The proof is in the demo.
 
-![Ask ClearShift with Genie](images/shot_genie.png)
+- **Safer floors** — fewer unqualified-work exposures reaching the floor.
+- **Clean audits** — readiness proven on demand, fewer citations and findings.
+- **Leaner staffing** — compliant substitutes from your own workforce, faster time-to-staff.
 
-> **Talking points:** For the questions no one anticipated. A safety lead asks in plain English and gets an answer grounded in the same governed tables, with the query shown. Governance does not stop at the dashboard.
-
----
-
-## ClearShift moves incident rate, citations, backfill spend, and time-to-staff.
-
-**RECORDABLE INCIDENT RATE** — Fewer unqualified-work exposures reaching the floor.
-
-**CITATIONS AND FINDINGS** — Audit readiness proven on demand, not reconstructed.
-
-**BACKFILL SPEND** — Compliant substitutes found from the existing workforce, not overtime or contractors.
-
-**TIME TO STAFF A COMPLIANT SHIFT** — From a manual scramble to a solved plan.
-
-# ~$275K to $440K
-estimated annual value for a twelve-plant manufacturer, before tail risk.
-
-> **Talking points:** For the executive sponsor, the number and the tail risk. For the domain owner, the daily workflow: clearance, audit readiness, and the what-if plan. Both get what they came for.
+> **Notes:** Roughly $275K to $440K a year before tail risk. These are the KPIs it moves; the proof is in the live demo. For the sponsor, the number and the tail risk; for the domain owner, the daily workflow.
 
 ---
 
-## One dataset flows through every layer, on one platform.
+## 9. The Architecture
 
-**Lakeflow** ingest → **Unity Catalog** govern → **Lakebase** serve → **ML** predict → **CP-SAT** decide → **Genie** query → **Databricks App** surface.
+One dataset flows through every layer, no silos. Unified data pipeline: Ingest → Govern → Serve → Predict → Decide → Query (Lakeflow, Unity Catalog, Lakebase, ML, CP-SAT, Genie, Databricks App).
 
-No siloed parts. Raw operational data becomes a compliance decision and a plain-language answer.
-
-![ClearShift architecture](images/architecture.png)
-
-> **Talking points:** The integration is the point. Raw operational data becomes a compliance decision and a plain-language answer, on one platform, with governance that travels the whole way.
+> **Notes:** The integration is the point. One dataset flows through every layer: Lakeflow ingests it, Unity Catalog governs it, Lakebase serves it, the model predicts, the optimizer decides, Genie answers, the app surfaces it. One platform, governance the whole way.
 
 ---
 
-## Start where exposure is highest, prove it in weeks, then expand.
+## 10. Next steps
 
-- Start with the foundation you already have: HR, scheduler, LMS.
-- Prove audit readiness in weeks, not a rebuild.
-- Add the model and the optimizer where the exposure is highest.
-- A reference implementation, adapted to your plants, not deployed as-is.
+Prove it in weeks. Expand where it matters. Adoption path: **Foundation** (unify HR, scheduler, LMS; prove audit readiness) → **Predict & gate** (lapse-risk model and pre-shift clearance where exposure is highest) → **Optimize at scale** (CP-SAT compliant crew planning across every plant).
 
-> **Talking points:** Close on the path. This is not a rip-and-replace. It sits beside the systems you run and answers the question they cannot. Start where the exposure is, prove it, expand.
+> **Notes:** Close on the path, not a rip-and-replace. It sits beside the systems you run and answers the question they cannot. Start where the exposure is, prove it, expand.
+
+---
+
+## 11. No one performs regulated work without proven qualification.
+
+Closing statement.
