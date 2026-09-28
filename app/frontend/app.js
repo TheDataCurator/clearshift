@@ -1914,6 +1914,67 @@ requirement. The join works either way, but the freshness claim would need resta
 <p><code>employee_qualification</code> is materialized here so the demo runs standalone. Against real
 data it should be a view over the existing certification records, not a second copy.</p>`,
 
+  dataflow: `
+<h3>Where the answers come from</h3>
+<p>A business user is right to ask whether a new system can be trusted. Every verdict in ClearShift is
+derived from records the plant already keeps, in systems it already runs. It reads those systems, it is
+not a second source of truth.</p>
+<svg viewBox="0 0 920 384" role="img" style="width:100%;height:auto;margin:16px 0;font-family:inherit"
+     aria-label="Data flows from the HR system, the workforce scheduler and the learning system, is governed on Databricks, and becomes the ClearShift views.">
+  <defs>
+    <marker id="df-arw" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+      <path d="M0 0L6 3L0 6z" fill="var(--ink-faint)"/>
+    </marker>
+  </defs>
+
+  <text x="145" y="22" text-anchor="middle" fill="var(--ink-faint)" font-size="12" font-weight="700" letter-spacing="1">SYSTEMS YOU ALREADY RUN</text>
+  <text x="410" y="22" text-anchor="middle" fill="var(--ink-faint)" font-size="12" font-weight="700" letter-spacing="1">GOVERNED</text>
+  <text x="730" y="22" text-anchor="middle" fill="var(--ink-faint)" font-size="12" font-weight="700" letter-spacing="1">WHAT YOU SEE</text>
+
+  <rect x="20" y="40" width="250" height="80" rx="10" fill="var(--card)" stroke="var(--line)"/>
+  <text x="40" y="72" fill="var(--ink)" font-size="16" font-weight="700">HR system</text>
+  <text x="40" y="98" fill="var(--ink-soft)" font-size="13">Employees, roles, supervisors</text>
+
+  <rect x="20" y="136" width="250" height="80" rx="10" fill="var(--card)" stroke="var(--line)"/>
+  <text x="40" y="168" fill="var(--ink)" font-size="16" font-weight="700">Workforce scheduler</text>
+  <text x="40" y="194" fill="var(--ink-soft)" font-size="13">Who works which seat tomorrow</text>
+
+  <rect x="20" y="232" width="250" height="80" rx="10" fill="var(--card)" stroke="var(--line)"/>
+  <text x="40" y="264" fill="var(--ink)" font-size="16" font-weight="700">Learning system (LMS)</text>
+  <text x="40" y="290" fill="var(--ink-soft)" font-size="13">Certifications, training, expiry</text>
+
+  <rect x="330" y="56" width="160" height="256" rx="12" fill="var(--page)" stroke="var(--line)" stroke-dasharray="4 4"/>
+  <text x="410" y="96" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">Databricks</text>
+  <text x="410" y="150" text-anchor="middle" fill="var(--ink-soft)" font-size="13">Ingested</text>
+  <text x="410" y="180" text-anchor="middle" fill="var(--ink-soft)" font-size="13">Cleaned</text>
+  <text x="410" y="210" text-anchor="middle" fill="var(--ink-soft)" font-size="13">Effective-dated</text>
+  <text x="410" y="240" text-anchor="middle" fill="var(--ink-soft)" font-size="13">Access-scoped</text>
+
+  <rect x="560" y="48"  width="340" height="54" rx="10" fill="var(--go-bg)" stroke="var(--go)" stroke-opacity=".35"/>
+  <text x="584" y="80" fill="var(--ink)" font-size="15" font-weight="600">Pre-shift clearance</text>
+  <rect x="560" y="114" width="340" height="54" rx="10" fill="var(--go-bg)" stroke="var(--go)" stroke-opacity=".35"/>
+  <text x="584" y="146" fill="var(--ink)" font-size="15" font-weight="600">Audit roster &amp; OSHA evidence</text>
+  <rect x="560" y="180" width="340" height="54" rx="10" fill="var(--go-bg)" stroke="var(--go)" stroke-opacity=".35"/>
+  <text x="584" y="212" fill="var(--ink)" font-size="15" font-weight="600">Crew plan (What-if)</text>
+  <rect x="560" y="246" width="340" height="54" rx="10" fill="var(--go-bg)" stroke="var(--go)" stroke-opacity=".35"/>
+  <text x="584" y="278" fill="var(--ink)" font-size="15" font-weight="600">Credential card</text>
+
+  <g fill="none" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#df-arw)">
+    <path d="M270 80  C302 80  300 118 326 122"/>
+    <path d="M270 176 L326 184"/>
+    <path d="M270 272 C302 272 300 248 326 246"/>
+    <path d="M492 120 C526 120 524 75  556 75"/>
+    <path d="M492 150 C526 150 524 141 556 141"/>
+    <path d="M492 216 C526 216 524 207 556 207"/>
+    <path d="M492 246 C526 246 524 273 556 273"/>
+  </g>
+
+  <text x="460" y="360" text-anchor="middle" fill="var(--ink-soft)" font-size="14" font-style="italic">Every verdict traces back to your own records. Nothing here is invented.</text>
+</svg>
+<p style="color:var(--ink-soft);font-size:.9rem">HR says who people are, the scheduler says where they are assigned, the learning system says what they
+are qualified to do. ClearShift joins the three and checks tomorrow against them. The same records an
+auditor would ask for are the ones the verdict is built from.</p>`,
+
   osha: `
 <h3>What this is built on, and what it is not</h3>
 <p><b>OSHA does not publish a certification report format.</b> There is no single
