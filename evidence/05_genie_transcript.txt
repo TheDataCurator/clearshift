@@ -1,5 +1,5 @@
 # ClearShift — Genie Agent transcript (natural language over the Unity Catalog gold tables)
-# captured 2026-09-25 15:26 CDT  |  POST /api/ask engine=genie  |  space set-per-environment
+# captured 2026-09-25 15:26 CDT  |  POST /api/ask engine=genie  |  space <redacted>
 # workspace: fevm-horizontal-dev-serverless (horizontals). Answer, generated SQL, and rows are Genie's real output.
 
 ===================================================================
