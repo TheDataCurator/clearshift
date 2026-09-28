@@ -6,19 +6,31 @@ Qualification gating, pre-shift safety, and compliant crew planning on Databrick
 
 ---
 
-## The problem many plant and EHS leaders face
+## ClearShift closes manufacturing's largest uncontrolled safety exposure, using data you already have, for $275K to $440K a year plus protection against a $1M-plus event.
 
-- A worker can be scheduled tomorrow into work they are not currently qualified to perform.
-- The learning system records who took a course. It cannot tell you who is cleared to work a seat tomorrow.
+Your systems record who was *trained*. They cannot tell you who is *cleared to work tomorrow*, so unqualified work reaches the floor and audit readiness is rebuilt by hand. ClearShift closes that gap three ways:
+
+- **Gate it before the shift.** Every scheduled seat is checked against what it requires, so exposure is caught the evening before, not after an incident.
+- **Prove it on demand.** Audit readiness is derived from dated records, cutting 40 hours per plant to minutes.
+- **Plan it intelligently.** A model flags who will lapse and an optimizer staffs a compliant crew from the workforce you already have.
+
+> **Talking points:** This is the whole story on one slide. Situation: only qualified people may do hazardous work. Complication: your systems record training, not tomorrow's clearance. Answer: ClearShift, worth this range annually with catastrophic-risk protection on top. Everything after this slide is evidence for these three points: prevent, prove, plan.
+
+---
+
+## Your systems record who was trained, not who is cleared to work tomorrow.
+
+- A worker can be scheduled tomorrow into work they are not qualified to perform.
+- The learning system records course completion, not who is cleared to work a seat.
 - Audit readiness is reconstructed by hand, plant by plant, the week an auditor calls.
 - First-time hazardous work slips through without a supervisor present.
 - The gap is invisible until an incident or a citation makes it visible.
 
-> **Talking points:** Every manufacturer with confined space, hot work, or lockout/tagout carries this exposure daily. The data exists, in the HR system, the scheduler, the LMS, but it is fragmented, so no one can answer the operational question in time to act.
+> **Talking points:** Every manufacturer with confined space, hot work, or lockout/tagout carries this exposure daily. The data exists, in HR, the scheduler, the LMS, but it is fragmented, so no one can answer the operational question in time to act.
 
 ---
 
-## What that exposure costs
+## One uncontrolled exposure runs $165K in penalties and over $1M in a fatality event.
 
 # $165K
 per willful or repeat OSHA citation (2024 maximum). Serious violations run to $16,550 each.
@@ -33,7 +45,7 @@ per plant, per audit, spent reconciling rosters by hand today.
 
 ---
 
-## ClearShift: a governed foundation, made intelligent
+## ClearShift turns fragmented qualification data into a governed daily control.
 
 **FOUNDATION** — All qualification, schedule, and requirement data, unified and effective-dated on Databricks.
 
@@ -45,7 +57,7 @@ per plant, per audit, spent reconciling rosters by hand today.
 
 ---
 
-## Pre-shift clearance: the gate
+## Every seat is checked the evening before, so exposure never reaches the floor.
 
 - Tomorrow's schedule, checked against what each job and work center requires.
 - One verdict per person: cleared, first performance, or not cleared, with a plain reason.
@@ -56,11 +68,11 @@ per plant, per audit, spent reconciling rosters by hand today.
 
 ---
 
-## Audit readiness: prove it the day they ask
+## Audit readiness is proven on demand, cutting 40 hours per plant to minutes.
 
 - Every regulated requirement at a site, and whether it is currently held.
 - Card serials, trainers, evidence references, ready to spot-check.
-- The answer is derived from dated records, not accumulated, so historical clearance is provable.
+- The answer is derived from dated records, so historical clearance is provable.
 
 # From 40 hrs to minutes
 audit roster reconciliation, per plant.
@@ -69,38 +81,44 @@ audit roster reconciliation, per plant.
 
 ---
 
-## Intelligence: predict who will lapse, do not just report who expired
+## A model flags who will lapse before the shift, not after they expire.
 
 - A gradient-boosted model scores every worker-certification pair: probability the certification lapses before the next hazardous job.
 - Leading signals: days to expiry, renewal behavior, training backlog, prior lapses, schedule pressure.
 - Measured performance: ROC AUC 0.88. Expiry proximity carries most of the signal; behavior adds the early warning.
 
+![Lapse-risk feature importance](images/feature_importance.png)
+
 > **Talking points:** A rule tells you who is already expired. The model tells you who is about to lapse and why, in time to renew before the shift is exposed. This is real machine learning, not an expiry date lookup.
 
 ---
 
-## What-if studio: a compliant crew, solved
+## The optimizer staffs a compliant crew from your workforce, and names what it cannot.
 
 - A CP-SAT optimizer assigns the qualified pool to tomorrow's regulated seats.
 - Hard compliance rules are constraints, never traded off: hold every required qualification, supervise every first performance, no double-booking.
 - Among compliant plans, it prefers workers whose own certification is least likely to lapse.
 - Seats it cannot staff are named, with the reason, so you act before the shift.
 
+![What-if studio](images/shot_whatif.png)
+
 > **Talking points:** This is the decision, not a report. In the live scenario it clears exposed seats by moving the right qualified people, and it tells you exactly which seats have no compliant answer and why. Scarce low-risk capacity gets spent where it matters.
 
 ---
 
-## Genie: ask in plain language, see the SQL
+## Anyone can ask in plain language and see the exact query behind the answer.
 
 - Natural-language questions over the governed gold tables.
 - Returns the SQL it ran, so the answer is inspectable, not taken on trust.
 - Answers within the caller's scope, and declines questions outside the data.
 
+![Ask ClearShift with Genie](images/shot_genie.png)
+
 > **Talking points:** For the questions no one anticipated. A safety lead asks in plain English and gets an answer grounded in the same governed tables, with the query shown. Governance does not stop at the dashboard.
 
 ---
 
-## The outcomes, in your KPIs
+## ClearShift moves incident rate, citations, backfill spend, and time-to-staff.
 
 **RECORDABLE INCIDENT RATE** — Fewer unqualified-work exposures reaching the floor.
 
@@ -117,17 +135,19 @@ estimated annual value for a twelve-plant manufacturer, before tail risk.
 
 ---
 
-## Built as one connected journey
+## One dataset flows through every layer, on one platform.
 
 **Lakeflow** ingest → **Unity Catalog** govern → **Lakebase** serve → **ML** predict → **CP-SAT** decide → **Genie** query → **Databricks App** surface.
 
-One dataset flows through every layer. No siloed parts.
+No siloed parts. Raw operational data becomes a compliance decision and a plain-language answer.
+
+![ClearShift architecture](images/architecture.png)
 
 > **Talking points:** The integration is the point. Raw operational data becomes a compliance decision and a plain-language answer, on one platform, with governance that travels the whole way.
 
 ---
 
-## Accelerate time to value. Build for the future.
+## Start where exposure is highest, prove it in weeks, then expand.
 
 - Start with the foundation you already have: HR, scheduler, LMS.
 - Prove audit readiness in weeks, not a rebuild.
