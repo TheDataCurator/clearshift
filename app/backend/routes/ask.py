@@ -27,12 +27,12 @@ router = APIRouter(prefix="/api/ask", tags=["ask"])
 
 SUGGESTIONS = [
     "Who is blocked from working tomorrow?",
+    "How many workers have a certification expiring in the next 90 days, by site?",
     "Is Peoria ready for the audit?",
     "Where is cover thin?",
     "Who could cover blast and coating?",
     "What lapses in the next 90 days?",
     "Who is overdue on compliance training?",
-    "Show me Lisa Chen's record",
     "Which manager has the worst completion?",
 ]
 

@@ -7,6 +7,14 @@ with it). Lead with the outcome, keep the demo tight, and switch altitude mid-an
 
 Total target: 12 to 15 minutes of walkthrough, then objections.
 
+> **Before you present (data freshness):** the demo is date-relative. Pre-shift
+> clearance and the What-if studio show "tomorrow", and the seed data is anchored
+> to the day it was loaded. If it has been more than a day since the last load,
+> reseed so "tomorrow" has schedule data: from the repo root run the DDL files in
+> `lakebase/ddl/` in order against the `clearshift` database, then
+> `python model/score_batch.py`. On a fresh reseed the Peoria scenario shows seven
+> regulated seats with five exposed.
+
 ---
 
 ## 0. Demo setup (60 seconds, before you touch the app)
@@ -93,7 +101,7 @@ Stay on **Coverage and what-if**. Read the three tiles, then click **Solve tomor
 
 Go to **Ask ClearShift**, switch the engine toggle to **Genie**.
 
-- Show: ask "Which qualifications are held by the fewest workers?" Read the answer.
+- Show: click the suggestion chip "How many workers have a certification expiring in the next 90 days, by site?" Read the answer. (This phrasing answers directly; more open-ended questions sometimes prompt Genie to ask a clarifying question first, which is fine but slower on stage.)
 - Show: expand **SQL Genie ran**. "It shows the query, over the governed gold tables. The answer is inspectable, not taken on trust, and it is scoped to who is asking."
 
 > **Land it:** "For the questions no one anticipated. Plain language in, governed answer out, with the SQL shown."
