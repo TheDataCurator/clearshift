@@ -73,8 +73,8 @@ One dataset flows through every layer. No siloed demos stitched together.
 
 Built in Claude Code. AI generated the synthetic data generators, the pipeline and DDL
 scaffolding, the optimizer, and the app, under direction on the domain model,
-the compliance rules, and the modeling choices above. The decisions, the OSHA and
-FRA framing, the value case, and the narrative are the author's.
+the compliance rules, and the modeling choices above. The decisions, the OSHA
+framing, the value case, and the narrative are the author's.
 
 ## Execution evidence
 
