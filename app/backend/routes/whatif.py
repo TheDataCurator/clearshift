@@ -57,9 +57,11 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
 
     # Collapse requirement rows into one seat per (scheduled worker, work center).
     seats: dict[str, dict] = {}
+    qual_names: dict[str, str] = {}
     plants = set()
     for r in shift_rows:
         job_id = f"{r['work_center_id']}|{r['scheduled_id']}"
+        qual_names[r["qualification_id"]] = r["qualification_name"]
         seat = seats.setdefault(job_id, {
             "job_id": job_id,
             "plant": r["location"],
@@ -97,7 +99,7 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
             current_counts["cleared"] += 1
 
     if not jobs:
-        return jobs, [], job_meta, current_counts, {}
+        return jobs, [], job_meta, current_counts, {}, {}, qual_names
 
     # Worker pool: everyone at the demanded plants holding a regulated
     # qualification in scope, with what they can supervise and the persisted
@@ -109,7 +111,8 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
                e.locationname  AS plant,
                qs.qualification_id,
                COALESCE(tm.is_supervisory, false) AS is_supervisory,
-               lr.lapse_risk
+               lr.lapse_risk,
+               lr.risk_explanation
           FROM gate.v_qualification_state qs
           JOIN gate.hr_employee e ON e.id = qs.employee_id
           LEFT JOIN gate.v_training_matrix tm ON tm.employee_id = qs.employee_id
@@ -132,18 +135,29 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
     for r in pool_rows:
         w = by_worker.setdefault(r["employee_id"], {
             "employee_name": r["employee_name"], "plant": r["plant"],
-            "is_supervisory": r["is_supervisory"], "quals": set(), "risk_by_qual": {},
+            "is_supervisory": r["is_supervisory"], "quals": set(),
+            "risk_by_qual": {}, "expl_by_qual": {},
         })
         w["quals"].add(r["qualification_id"])
         w["risk_by_qual"][r["qualification_id"]] = (
             float(r["lapse_risk"]) if r["lapse_risk"] is not None else 0.5)
+        w["expl_by_qual"][r["qualification_id"]] = r.get("risk_explanation")
 
     workers = []
+    explanations: dict[str, str] = {}
     for wid, w in by_worker.items():
         if wid in exclude:
             continue
-        relevant = [w["risk_by_qual"][q] for q in w["quals"] if (w["plant"], q) in demanded]
-        risk = max(relevant) if relevant else 0.5
+        # Risk for the pool is the worst relevant qualification; carry the
+        # explanation for that same qualification so the surfaced "why" matches
+        # the number the optimizer actually used.
+        relevant_quals = [q for q in w["quals"] if (w["plant"], q) in demanded]
+        if relevant_quals:
+            top_q = max(relevant_quals, key=lambda q: w["risk_by_qual"].get(q, 0.5))
+            risk = w["risk_by_qual"].get(top_q, 0.5)
+            explanations[wid] = w["expl_by_qual"].get(top_q)
+        else:
+            risk = 0.5
         workers.append(Worker(
             worker_id=wid, plant=w["plant"], quals=frozenset(w["quals"]),
             lapse_risk=risk,
@@ -151,14 +165,14 @@ def _scenario(principal: str, work_date: date, exclude: set[str]):
         ))
 
     names = {wid: w["employee_name"] for wid, w in by_worker.items()}
-    return jobs, workers, job_meta, current_counts, names
+    return jobs, workers, job_meta, current_counts, names, explanations, qual_names
 
 
 @router.get("/scenario")
 def scenario(principal: str = Query(default=None), work_date: date | None = Query(default=None)):
     principal = principal or config.DEFAULT_PRINCIPAL
     d = work_date or (date.today() + timedelta(days=1))
-    jobs, workers, job_meta, counts, names = _scenario(principal, d, set())
+    jobs, workers, job_meta, counts, names, explanations, qual_names = _scenario(principal, d, set())
     return {
         "principal": principal, "work_date": d,
         "seat_count": len(jobs), "worker_count": len(workers), "current": counts,
@@ -166,6 +180,7 @@ def scenario(principal: str = Query(default=None), work_date: date | None = Quer
         "workers": sorted(
             [{"employee_id": w.worker_id, "employee_name": names.get(w.worker_id, w.worker_id),
               "qualifications": sorted(w.quals), "lapse_risk": round(w.lapse_risk, 2),
+              "risk_explanation": explanations.get(w.worker_id),
               "can_supervise": bool(w.can_supervise)} for w in workers],
             key=lambda x: x["lapse_risk"], reverse=True),
     }
@@ -180,7 +195,7 @@ def solve(payload: dict = Body(default={})):
     exclude = set(payload.get("exclude_workers") or [])
     risk_weight = int(payload.get("risk_weight") or 1000)
 
-    jobs, workers, job_meta, counts, names = _scenario(principal, d, exclude)
+    jobs, workers, job_meta, counts, names, explanations, qual_names = _scenario(principal, d, exclude)
     if not jobs:
         return {"principal": principal, "work_date": d, "status": "NO_JOBS",
                 "message": "No regulated shift demand in scope for this date.",
@@ -201,6 +216,7 @@ def solve(payload: dict = Body(default={})):
             "current_clearance": meta["current_clearance"],
             "assigned_id": a["worker"], "assigned_name": names.get(a["worker"], a["worker"]),
             "assigned_lapse_risk": a["lapse_risk"], "reassigned_from_scheduled": reassigned,
+            "assigned_risk_explanation": explanations.get(a["worker"]),
         })
 
     # Reason each uncovered seat, against the full qualified pool.
@@ -211,6 +227,21 @@ def solve(payload: dict = Body(default={})):
         return any(w.plant == job.plant and (w.can_supervise & job.reqs()) for w in workers)
 
     jobs_by_id = {j.job_id: j for j in jobs}
+
+    def nearest_substitute(job):
+        """The worker at this plant missing the fewest of the seat's requirements,
+        so an exposed seat comes with a concrete next move, not just a reason."""
+        best = None
+        for w in workers:
+            if w.plant != job.plant:
+                continue
+            overlap = len(job.reqs() & w.quals)
+            if overlap == 0 or job.reqs() <= w.quals:
+                continue
+            if best is None or overlap > best[0]:
+                best = (overlap, w, job.reqs() - w.quals)
+        return best
+
     uncovered = []
     for job_id in result["uncovered"]:
         meta = job_meta[job_id]
@@ -218,15 +249,30 @@ def solve(payload: dict = Body(default={})):
         if not holds_full(job):
             reason = (f"No worker holds the full requirement ({meta['qualification']}) "
                       f"for {meta['work_center']} at {meta['plant']}.")
+            sub = nearest_substitute(job)
+            if sub:
+                _, w, missing = sub
+                miss = ", ".join(qual_names.get(q, q) for q in sorted(missing))
+                remediation = (f"Closest substitute: {names.get(w.worker_id, w.worker_id)} "
+                               f"holds all but {miss}. Sponsor that credential, or move a "
+                               f"qualified worker in from another plant.")
+            else:
+                remediation = (f"No one at {meta['plant']} holds any part of this requirement. "
+                               f"Nearest path is a new credential or a cross-plant transfer.")
         elif meta["first_time_regulated"] and not has_supervisor(job):
             reason = (f"First-time regulated work needs a qualified supervisor present; "
                       f"none available at {meta['plant']}.")
+            remediation = (f"Schedule a qualified supervisor at {meta['plant']} for the first "
+                           f"performance, or defer the task until one is available.")
         else:
             reason = "Qualified capacity is fully committed to other regulated seats this shift."
+            remediation = ("Add capacity for this shift, bring in a qualified worker from "
+                           "another plant, or resequence a lower-priority regulated seat.")
         uncovered.append({
             "job_id": job_id, "plant": meta["plant"], "work_center": meta["work_center"],
             "qualification": meta["qualification"], "scheduled_name": meta["scheduled_name"],
             "current_clearance": meta["current_clearance"], "reason": reason,
+            "remediation": remediation,
         })
 
     total_risk = round(sum(a["assigned_lapse_risk"] for a in assignments), 2)

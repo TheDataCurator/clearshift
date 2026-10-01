@@ -111,7 +111,14 @@ CREATE TABLE IF NOT EXISTS gate.lapse_risk (
     employee_id      text        NOT NULL,
     qualification_id text        NOT NULL,
     lapse_risk       numeric(5,4) NOT NULL,   -- 0..1 predicted probability of lapse
+    risk_explanation text,                    -- plain-language why, from SHAP (model/explain.py)
+    top_factors      jsonb,                   -- signed per-feature attribution for this prediction
     model_version    text        NOT NULL,
     scored_on        date        NOT NULL DEFAULT current_date,
     PRIMARY KEY (employee_id, qualification_id)
 );
+
+-- The explanation columns are additive; add them to an already-created table too,
+-- so an existing deployment picks them up without a drop.
+ALTER TABLE gate.lapse_risk ADD COLUMN IF NOT EXISTS risk_explanation text;
+ALTER TABLE gate.lapse_risk ADD COLUMN IF NOT EXISTS top_factors jsonb;

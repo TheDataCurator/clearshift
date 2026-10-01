@@ -829,6 +829,8 @@ async function solveWhatif() {
             ${a.reassigned_from_scheduled
               ? `<div class="loc">was ${esc(a.scheduled_name)} — ${esc(WI_CLEAR[a.current_clearance]?.word || a.current_clearance)}</div>`
               : ''}
+            ${a.assigned_risk_explanation
+              ? `<div class="loc why">${esc(a.assigned_risk_explanation)}</div>` : ''}
           </span>
           <span>${riskPill(a.assigned_lapse_risk)}</span>
         </div>`).join('');
@@ -841,7 +843,8 @@ async function solveWhatif() {
               ${esc(WI_CLEAR[u.current_clearance]?.word || u.current_clearance)}</span>
             <span class="qn"><b>${esc(u.work_center)}</b>
               <div class="loc">${esc(u.qualification)}</div>
-              <div class="loc">${esc(u.reason)}</div></span>
+              <div class="loc">${esc(u.reason)}</div>
+              ${u.remediation ? `<div class="loc fix">▸ ${esc(u.remediation)}</div>` : ''}</span>
           </div>`).join('')
       : `<p class="empty">Every regulated seat can be compliantly staffed.</p>`;
   } catch (e) {

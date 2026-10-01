@@ -1,0 +1,84 @@
+ClearShift lapse-risk model: per-prediction explanations
+method: SHAP TreeExplainer over GradientBoostingClassifier  | features: days_to_expiry, prior_lapse_count, total_certs_held, training_backlog, schedule_pressure, is_regulated, proactive_renewal_behavior
+==============================================================================
+
+Case 1  (method=shap)
+  explanation: High lapse risk (100%): certification already past expiry is the largest factor, with heavy upcoming hazardous schedule.
+  score: 0.9966
+  governed feature values:
+      days_to_expiry               -80
+      prior_lapse_count            0
+      total_certs_held             2
+      training_backlog             0
+      schedule_pressure            10
+      is_regulated                 1
+      proactive_renewal_behavior   0.849
+  signed factor attribution (top drivers):
+      days_to_expiry               value=-80        shap=+5.4679  -> certification already past expiry
+      schedule_pressure            value=10         shap=+0.0894  -> heavy upcoming hazardous schedule
+
+Case 2  (method=shap)
+  explanation: High lapse risk (99%): certification already past expiry is the largest factor, with 3 prior lapses on record.
+  score: 0.9944
+  governed feature values:
+      days_to_expiry               -90
+      prior_lapse_count            3
+      total_certs_held             3
+      training_backlog             1
+      schedule_pressure            5
+      is_regulated                 1
+      proactive_renewal_behavior   0.416
+  signed factor attribution (top drivers):
+      days_to_expiry               value=-90        shap=+4.6465  -> certification already past expiry
+      prior_lapse_count            value=3          shap=+1.2043  -> 3 prior lapses on record
+
+Case 3  (method=shap)
+  explanation: Low lapse risk (10%): renews ahead of expiry is the largest factor, with no prior lapses; no training backlog.
+  score: 0.0973
+  governed feature values:
+      days_to_expiry               66
+      prior_lapse_count            0
+      total_certs_held             2
+      training_backlog             0
+      schedule_pressure            1
+      is_regulated                 1
+      proactive_renewal_behavior   0.836
+  signed factor attribution (top drivers):
+      proactive_renewal_behavior   value=0.836      shap=-0.4163  -> renews ahead of expiry
+      prior_lapse_count            value=0          shap=-0.2730  -> no prior lapses
+      training_backlog             value=0          shap=-0.2478  -> no training backlog
+
+Case 4  (method=shap)
+  explanation: Low lapse risk (2%): certification valid for 648 more days is the largest factor, with renews ahead of expiry; no prior lapses.
+  score: 0.0158
+  governed feature values:
+      days_to_expiry               648
+      prior_lapse_count            0
+      total_certs_held             5
+      training_backlog             1
+      schedule_pressure            7
+      is_regulated                 0
+      proactive_renewal_behavior   0.72
+  signed factor attribution (top drivers):
+      days_to_expiry               value=648        shap=-1.9113  -> certification valid for 648 more days
+      proactive_renewal_behavior   value=0.72       shap=-0.6256  -> renews ahead of expiry
+      prior_lapse_count            value=0          shap=-0.2664  -> no prior lapses
+
+Case 5  (method=shap)
+  explanation: Low lapse risk (1%): certification valid for 702 more days is the largest factor, with no prior lapses; renews ahead of expiry.
+  score: 0.0123
+  governed feature values:
+      days_to_expiry               702
+      prior_lapse_count            0
+      total_certs_held             9
+      training_backlog             0
+      schedule_pressure            5
+      is_regulated                 1
+      proactive_renewal_behavior   0.981
+  signed factor attribution (top drivers):
+      days_to_expiry               value=702        shap=-1.6234  -> certification valid for 702 more days
+      prior_lapse_count            value=0          shap=-0.3884  -> no prior lapses
+      proactive_renewal_behavior   value=0.981      shap=-0.3654  -> renews ahead of expiry
+
+==============================================================================
+Persisted per (worker, qualification) in gate.lapse_risk (risk_explanation, top_factors), surfaced in the app and the audit trail.

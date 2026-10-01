@@ -497,6 +497,8 @@ tr:last-child td { border-bottom: 0; }
 }
 .cover-row .qn { flex: 1; min-width: 0; }
 .cover-row .loc { font-size: .75rem; color: var(--ink-faint); }
+.cover-row .loc.why { color: var(--ink-soft); font-style: italic; }
+.cover-row .loc.fix { color: var(--go); font-style: normal; margin-top: 2px; }
 .cover-row .cnt { font-variant-numeric: tabular-nums; font-weight: 640; }
 
 /* Opportunity cards */

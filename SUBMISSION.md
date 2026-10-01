@@ -28,9 +28,15 @@ ClearShift answers three questions the LMS cannot:
 
 The tail risk dominates the average: a single confined-space fatality citation and the
 litigation behind it runs well over $1M all-in. ClearShift is a control against that
-event, not only an efficiency play. Buyer KPIs it moves: recordable incident rate
-(TRIR), audit findings and citations, contractor and overtime backfill spend, and
-time-to-staff a compliant shift.
+event, not only an efficiency play.
+
+**Who owns which number.** The value lands on the metric each buyer is personally
+measured on, not a generic efficiency figure. The VP of EHS carries the recordable
+incident rate (TRIR/DART) and the audit-finding count on their annual goals; ClearShift
+moves both by stopping the uncleared assignment before the shift and making the audit a
+non-event. The CFO owns the tail-risk exposure and the audit-labor line. The plant
+manager is measured on time-to-staff a compliant shift and the overtime that scrambling
+burns. Same dollars, read against each scorecard.
 
 ## The integrated data journey
 
@@ -41,9 +47,9 @@ One dataset flows through every layer. No siloed demos stitched together.
 | **Lakeflow** ingest | `pipeline/clearshift_pipeline.py`, `pipeline/raw/` | A Lakeflow Declarative Pipeline ingests the raw HR, schedule, qualification, training and incident files into bronze, cleans to silver, and builds the gold tables. |
 | **Unity Catalog** govern | `horizontal_dev_serverless_catalog.clearshift.*` | Bronze/silver/gold land in Unity Catalog. The Genie space and the model registry read from here. |
 | **Lakebase** serve | `lakebase/ddl/` (11 DDL files) | The operational store. Effective-dated requirements and dated credentials let past clearance be derived, not accumulated. Viewer scope (site and supervisor) is enforced on every read. |
-| **ML** make it intelligent | `model/train.py`, `model/generate_history.py`, `model/score_batch.py` | A gradient-boosted model predicts the probability a worker's certification lapses before their next hazardous job, from leading behavioral signals. Scores persist to `gate.lapse_risk`. |
+| **ML** make it intelligent | `model/train.py`, `model/generate_history.py`, `model/score_batch.py`, `model/explain.py` | A gradient-boosted model predicts the probability a worker's certification lapses before their next hazardous job, from leading behavioral signals. SHAP turns each score into a plain-language explanation grounded in the worker's own governed feature values. The score and the explanation persist to `gate.lapse_risk`. |
 | **Optimization** decide | `app/backend/optimizer.py` | A CP-SAT (OR-Tools) optimizer turns those risk scores into a compliant crew plan. Hard compliance rules are constraints; lapse risk is the objective. |
-| **Genie Agent** query | Genie space `01f1b7c3...`, `app/backend/genie.py` | Natural-language questions over the gold tables, returning the SQL Genie ran so the answer is inspectable. |
+| **Genie Agent** query | Genie space `01f1b7c3...`, `app/backend/genie.py`, `genie/benchmarks.md` | Natural-language questions over the gold tables, returning the SQL Genie ran so the answer is inspectable. Validated against a 15-question benchmark with expected SQL (87% on the last run). |
 | **Databricks App** surface | `app/` (FastAPI + static SPA) | Nine operational views for the supervisor, auditor, and plant manager, including the live What-if studio. |
 
 ## Decisions and trade-offs
@@ -68,6 +74,13 @@ One dataset flows through every layer. No siloed demos stitched together.
   manager sees their site, safety sees everything. In production this also belongs in
   row-level security in the database; doing it in one place in the app keeps the
   reference readable.
+- **A score is not an explanation.** Every prediction persists a SHAP-based,
+  plain-language reason grounded in the worker's own governed values ("expires in 12
+  days, two prior lapses"), so a supervisor acts on why, not a bare number, and the
+  attribution is a property of the model rather than a hand-written rule.
+- **An exposed seat ships with a next move.** When the optimizer cannot compliantly
+  staff a seat it does not stop at the reason: it names the nearest qualified
+  substitute and what they would need, so the gap is actionable before the shift.
 
 ## How AI was used as a force multiplier
 
@@ -78,9 +91,11 @@ framing, the value case, and the narrative are the author's.
 
 ## Execution evidence
 
-See `evidence/` for committed run output of every layer (model training metrics, batch
-scoring, the optimizer solve, the live What-if API response, and the Genie transcript
-with generated SQL and rows). The evaluator reads text; the evidence is text.
+See `evidence/` for committed run output of every layer: model training metrics, batch
+scoring, the optimizer solve, the live What-if API response, the Genie transcript with
+generated SQL and rows, the Genie benchmark evaluation (15 questions with expected SQL,
+87% on the last run), and per-prediction model explanations with their SHAP attribution.
+The evaluator reads text; the evidence is text.
 
 ## Data
 

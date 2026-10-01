@@ -42,25 +42,25 @@ A single control runs across the day: **Evening** gate the shift (clear or flag)
 
 ## 5. Predict lapses with time to act
 
-Lapse-risk model feature importance, ROC AUC 0.88. Days to expiry carries most of the signal; behavioral signals (proactive renewal, training backlog, prior lapses) add the early warning.
+Lapse-risk model feature importance, ROC AUC 0.88. Days to expiry carries most of the signal; behavioral signals (proactive renewal, training backlog, prior lapses) add the early warning. Per worker, SHAP turns the score into a plain-language reason grounded in their own record.
 
-> **Notes:** A rule tells you who already expired. The model predicts who is about to lapse, and why, in time to renew before the shift is exposed. Gradient-boosted, ROC AUC 0.88, on leading signals. Real machine learning, not an expiry lookup.
+> **Notes:** A rule tells you who already expired. The model predicts who is about to lapse, and why, in time to renew before the shift is exposed. Gradient-boosted, ROC AUC 0.88, on leading signals. Real machine learning, not an expiry lookup. And every score carries a SHAP-based explanation in plain language, grounded in the worker's own governed values (expires in 12 days, two prior lapses), so a supervisor sees the reason, not just a number.
 
 ---
 
 ## 6. The optimizer staffs a compliant crew from your workforce, and calls out risk
 
-The What-if studio: a CP-SAT optimizer assigns the qualified pool to tomorrow's regulated seats, prefers the lowest-lapse-risk workers, and names the seats it cannot compliantly staff, with the reason.
+The What-if studio: a CP-SAT optimizer assigns the qualified pool to tomorrow's regulated seats, prefers the lowest-lapse-risk workers, and names the seats it cannot compliantly staff, with the reason and the nearest qualified substitute to pursue.
 
-> **Notes:** This is the decision, not a report. Hard compliance rules are constraints, never traded off: hold every required qualification, supervise every first performance, no double-booking. In the live scenario it clears exposed seats by moving the right people, and names what it cannot staff and why, so you act before the shift.
+> **Notes:** This is the decision, not a report. Hard compliance rules are constraints, never traded off: hold every required qualification, supervise every first performance, no double-booking. In the live scenario it clears exposed seats by moving the right people, and for the seats it cannot staff it names why and the closest substitute or next step, so you act before the shift.
 
 ---
 
 ## 7. Ask the questions to keep on top of your data
 
-Ask ClearShift with Genie: natural-language questions over the governed gold tables, returning the SQL it ran.
+Ask ClearShift with Genie: natural-language questions over the governed gold tables, returning the SQL it ran. Validated against a 15-question benchmark (87% on the last run).
 
-> **Notes:** For the questions no one anticipated. Natural language over the same governed gold tables. It returns the SQL it ran, so the answer is inspectable, not taken on trust, and it is scoped to who is asking. Governance does not stop at the dashboard.
+> **Notes:** For the questions no one anticipated. Natural language over the same governed gold tables. It returns the SQL it ran, so the answer is inspectable, not taken on trust, and it is scoped to who is asking. And the space is benchmarked against 15 questions with expected SQL, 87% on the last run, so reliability is measured, not asserted. Governance does not stop at the dashboard.
 
 ---
 
@@ -72,7 +72,7 @@ The proof is in the demo.
 - **Clean audits** — readiness proven on demand, fewer citations and findings.
 - **Leaner staffing** — compliant substitutes from your own workforce, faster time-to-staff.
 
-> **Notes:** Roughly $275K to $440K a year before tail risk. These are the KPIs it moves; the proof is in the live demo. For the sponsor, the number and the tail risk; for the domain owner, the daily workflow.
+> **Notes:** Roughly $275K to $440K a year before tail risk. Read it against the number each buyer owns: the VP of EHS carries recordable rate (TRIR/DART) and audit findings; the CFO owns tail-risk exposure and audit labor; the plant manager, time-to-staff a compliant shift and overtime. Same dollars, each scorecard. For the sponsor, the number and the tail risk; for the domain owner, the daily workflow.
 
 ---
 

@@ -28,6 +28,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -36,6 +37,9 @@ import numpy as np
 import pandas as pd
 import psycopg2
 import psycopg2.extras
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from explain import explain_frame
 
 FEATURES = [
     "days_to_expiry",
@@ -122,23 +126,34 @@ def main() -> None:
     # It is effectively far from expiry, so impute a large horizon rather than
     # letting NaN reach the estimator (sklearn GBM rejects NaN).
     X["days_to_expiry"] = X["days_to_expiry"].fillna(3650)
-    X = X.fillna(0)
-    feats["lapse_risk"] = np.round(_predict(model, X.astype(float)), 4)
+    X = X.fillna(0).astype(float)
+    feats["lapse_risk"] = np.round(_predict(model, X), 4)
 
-    rows = list(feats[["employee_id", "qualification_id", "lapse_risk"]].itertuples(index=False, name=None))
+    # Explain each score: SHAP attribution turned into a plain-language reason
+    # grounded in the worker's own feature values, persisted next to the score so
+    # the app and the audit trail carry the why, not just the number.
+    explanations = explain_frame(model, X, feats["lapse_risk"].values)
+    feats["risk_explanation"] = [e["explanation"] for e in explanations]
+    feats["top_factors"] = [json.dumps(e["top_factors"]) for e in explanations]
+
+    rows = list(feats[["employee_id", "qualification_id", "lapse_risk",
+                       "risk_explanation", "top_factors"]].itertuples(index=False, name=None))
     with conn, conn.cursor() as cur:
         psycopg2.extras.execute_values(
             cur,
             """
-            INSERT INTO gate.lapse_risk (employee_id, qualification_id, lapse_risk, model_version, scored_on)
+            INSERT INTO gate.lapse_risk
+                (employee_id, qualification_id, lapse_risk, risk_explanation, top_factors, model_version, scored_on)
             VALUES %s
             ON CONFLICT (employee_id, qualification_id)
-            DO UPDATE SET lapse_risk = EXCLUDED.lapse_risk,
-                          model_version = EXCLUDED.model_version,
-                          scored_on = EXCLUDED.scored_on
+            DO UPDATE SET lapse_risk       = EXCLUDED.lapse_risk,
+                          risk_explanation = EXCLUDED.risk_explanation,
+                          top_factors      = EXCLUDED.top_factors,
+                          model_version    = EXCLUDED.model_version,
+                          scored_on        = EXCLUDED.scored_on
             """,
-            [(e, q, float(r), version) for (e, q, r) in rows],
-            template="(%s, %s, %s, %s, current_date)",
+            [(e, q, float(r), ex, tf, version) for (e, q, r, ex, tf) in rows],
+            template="(%s, %s, %s, %s, %s::jsonb, %s, current_date)",
         )
     conn.close()
 
@@ -150,6 +165,9 @@ def main() -> None:
                "prior_lapse_count", "training_backlog", "lapse_risk"]]
           .to_string(index=False))
     print(f"\nmean predicted lapse risk: {feats['lapse_risk'].mean():.3f}")
+    print("example explanation (highest risk):")
+    print(f"    {top.iloc[0]['employee_id']} / {top.iloc[0]['qualification_id']}: "
+          f"{feats.loc[top.index[0], 'risk_explanation']}")
 
 
 if __name__ == "__main__":

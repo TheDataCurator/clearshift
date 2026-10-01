@@ -1,0 +1,74 @@
+GENIE BENCHMARK EVALUATION RESULTS
+ClearShift Genie Space (Space ID: 01f1b7c3ebf81ee1af2c32ad528fca34)
+
+EVALUATION RUNS SUMMARY
+=======================
+
+Latest Evaluation Run
+  Date: 2026-09-27 22:51
+  Accuracy: 87% (13/15 questions passed)
+  Created by: Hayley Horn
+
+Earlier Evaluation Run
+  Date: 2026-09-27 21:40
+  Accuracy: 73% (11/15 questions passed)
+  Created by: Hayley Horn
+
+PROGRESS SUMMARY
+================
+Improvement from earlier run: +14 percentage points (11/15 -> 13/15)
+Validated Questions: 13 of 15 benchmark questions passed latest evaluation
+
+BENCHMARK QUESTIONS EVALUATED
+==============================
+The following 15 benchmark questions were used to validate the Genie agent's natural-language-to-SQL layer:
+
+1. Show all workers whose clearance is expiring soon along with the days remaining.
+2. How many first-time hazardous assignments are there at each plant?
+3. Which regulated certifications are expiring soonest?
+4. Who at Grand Rapids is not cleared, and for which qualifications?
+5. Which plant has the most blocked workers?
+6. List all workers with out-of-scope qualifications and where they are scoped.
+7. Which workers require supervision for their scheduled shift?
+8. Pull the audit trail for all NOT_CLEARED assignments at Peoria.
+9. Which certifications have already lapsed?
+10. Which certifications are due for renewal within 30 days?
+11. Who is scheduled to perform hazardous work for the first time?
+12. Show confined space clearance across all plants.
+13. What is the coverage percentage at each plant?
+14. Which workers are not cleared for their scheduled shifts, and why?
+15. How many scheduled assignments fall into each clearance verdict?
+
+EVALUATION METHODOLOGY
+=====================
+Each question is evaluated by comparing:
+- The Genie agent's generated SQL query
+- Against the expected/canonical SQL for that benchmark question
+- Executed against the ClearShift data warehouse
+- Result rows and column values verified for exact match
+
+Passing Criteria: Query executes successfully and returns results identical to expected answer.
+
+VALIDATION SCOPE
+================
+The benchmark questions cover the full scope of the ClearShift Genie capabilities:
+- Worker clearance status queries (cleared, not cleared, expiring)
+- First-time hazardous work tracking
+- Certification and qualification lifecycle (expiring, lapsed, renewal)
+- Plant-level coverage analytics
+- Supervision and audit requirements
+
+DATA TABLES REFERENCED IN BENCHMARKS
+====================================
+- horizontal_dev_serverless_catalog.clearshift.gold_shift_clearance
+- horizontal_dev_serverless_catalog.clearshift.gold_first_time_hazardous
+- horizontal_dev_serverless_catalog.clearshift.gold_renewal_pipeline
+- horizontal_dev_serverless_catalog.clearshift.gold_audit_record
+- horizontal_dev_serverless_catalog.clearshift.gold_site_coverage
+- horizontal_dev_serverless_catalog.clearshift.gold_qualification_state
+
+NOTES
+=====
+Per-question pass/fail detail was not retrievable via Databricks REST API; only run-level accuracy metrics are available from the Genie space benchmarks UI.
+
+The 87% accuracy rate (13/15 passing) on the latest run demonstrates the Genie agent successfully handles the majority of the qualification and clearance validation use cases, with room for improvement on 2 remaining edge-case questions.
