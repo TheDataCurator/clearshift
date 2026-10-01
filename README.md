@@ -35,6 +35,26 @@ LAKEBASE_DATABASE=clearshift LAKEBASE_HOST=localhost \
 
 Then open <http://127.0.0.1:8010>.
 
+## Running the demo on a later day (reseed)
+
+The demo is date-relative: the pre-shift clearance and the What-if studio read
+tomorrow's regulated schedule (`work_date = CURRENT_DATE + 1`). The seed loads
+those rows relative to the day it was first run, so on a later day they age out
+and the What-if shows **0 seats**. Reseed tomorrow's schedule and rescore with a
+single command (run it the morning you present):
+
+```bash
+# against the deployed Lakebase (needs Databricks CLI auth to the workspace):
+.venv-model/bin/python scripts/reseed.py --profile horizontals
+
+# against a local Postgres named clearshift:
+LAKEBASE_HOST=localhost PGPASSWORD=<pw> .venv-model/bin/python scripts/reseed.py --local
+```
+
+It is idempotent (safe to run every day): it clears and re-inserts the
+date-relative schedule rows, then re-runs `model/score_batch.py`. It prints the
+number of regulated seats now scheduled for tomorrow.
+
 ## The model
 
 Three tables carry the logic. Everything else is source data or presentation.
