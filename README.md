@@ -1,19 +1,62 @@
 # ClearShift
 
-A working reference for certification-gated work assignment on Lakebase. It answers three
-questions a learning management system usually cannot:
+### No one performs regulated work without proven qualification.
 
-1. Is this person cleared for the work they are scheduled to do tomorrow?
-2. Is everyone at this site currently qualified, and can we prove it on the day an auditor asks?
-3. Is anyone about to perform hazardous work for the first time?
+**ClearShift** makes sure no one is scheduled into hazardous, regulated work they are not
+currently qualified to perform, and proves that readiness to an auditor on demand. One
+governed journey on Databricks, built for manufacturers running confined-space, hot-work,
+lockout/tagout, and powered-industrial-truck operations.
 
-A reference implementation intended to be adapted rather than deployed as-is.
+![ClearShift across the day: gate the shift the evening before, staff a compliant crew, prove the audit on demand](deck/images/day_in_life.png)
+
+### The three questions it answers
+
+> A learning management system records who took a course. It cannot answer the operational
+> question a plant has at 5 p.m.
+
+1. **Is this person cleared** for the work they are scheduled to do tomorrow?
+2. **Is every regulated requirement at this site currently held**, and can we prove it the
+   day an auditor asks?
+3. **When a seat will not clear**, who is the compliant, lowest-risk substitute, and which
+   seats cannot be staffed at all, so we act before the shift?
+
+### What it's worth
+
+Estimated annual value for a twelve-plant manufacturer. Conservative, before the tail risk.
+
+| Lever | Basis | Annual |
+|---|---|---|
+| Regulatory penalties avoided | 1–2 serious or willful OSHA citations avoided ($16,550 serious, $165,514 willful/repeat) | **$165K–$330K** |
+| Audit preparation labor | Roster reconciliation cut from ~40 hrs per plant per audit; 12 plants, 2 audits/yr | **~$70K** |
+| Unplanned incident exposure | One recordable avoided at ~$40K direct and indirect | **~$40K** |
+| **Annual total, excluding tail risk** | | **~$275K–$440K** |
+
+Runs on existing Databricks for roughly **$60K a year**. A single confined-space fatality
+with the litigation behind it runs well past **$1M** all-in, which is the real reason this
+is a board-level control, not a line item.
+
+## How it works
+
+One dataset flows through every layer. No siloed demos stitched together.
+
+![One governed journey: Lakeflow ingest, Unity Catalog governance, Lakebase serving, an ML lapse-risk model, a CP-SAT optimizer, Genie, and a Databricks App](deck/images/architecture.png)
+
+| Layer | What it does |
+|---|---|
+| **Lakeflow** | Ingests HR, scheduler, and LMS sources to bronze, cleans to silver, builds the gold tables |
+| **Unity Catalog** | Governs who sees what: plant and crew scoping, so one plant never sees another's workforce data |
+| **Lakebase** | The operational store the app reads under scope; effective-dated requirements let past clearance be derived, not accumulated |
+| **ML lapse-risk model** | Predicts who is about to lapse before the shift, with a plain-language reason per worker |
+| **Optimizer (CP-SAT)** | Builds a compliant crew from the qualified pool; names the seats it cannot staff, with the nearest substitute |
+| **Genie** | Natural-language questions over the governed gold tables, returning the SQL it ran |
+| **Databricks App** | Surfaces all of it to the floor, the supervisor, the auditor, and the plant manager |
 
 ## What it is not
 
-It does not replace a course catalogue, enrolment, content delivery, completions or
-assessment. Those belong in the learning management system. This sits beside that
-system and consumes what it already records.
+It does not replace a course catalogue, enrollment, content delivery, completions, or
+assessment. Those belong in the learning management system. ClearShift sits beside that
+system and consumes what it already records. It is a reference implementation intended to
+be adapted, not deployed as-is.
 
 ## Running it locally
 
