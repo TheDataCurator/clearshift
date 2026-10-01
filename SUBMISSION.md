@@ -47,7 +47,7 @@ One dataset flows through every layer. No siloed demos stitched together.
 | **Lakeflow** ingest | `pipeline/clearshift_pipeline.py`, `pipeline/raw/` | A Lakeflow Declarative Pipeline ingests the raw HR, schedule, qualification, training and incident files into bronze, cleans to silver, and builds the gold tables. |
 | **Unity Catalog** govern | `horizontal_dev_serverless_catalog.clearshift.*` | Bronze/silver/gold land in Unity Catalog. The Genie space and the model registry read from here. |
 | **Lakebase** serve | `lakebase/ddl/` (11 DDL files) | The operational store. Effective-dated requirements and dated credentials let past clearance be derived, not accumulated. Viewer scope (site and supervisor) is enforced on every read. |
-| **ML** make it intelligent | `model/train.py`, `model/generate_history.py`, `model/score_batch.py`, `model/explain.py` | A gradient-boosted model predicts the probability a worker's certification lapses before their next hazardous job, from leading behavioral signals. SHAP turns each score into a plain-language explanation grounded in the worker's own governed feature values. The score and the explanation persist to `gate.lapse_risk`. |
+| **ML** make it intelligent | `model/train.py`, `model/generate_history.py`, `model/score_batch.py`, `model/explain.py`, `model/monitor_drift.py` | A gradient-boosted model predicts the probability a worker's certification lapses before their next hazardous job, from leading behavioral signals. SHAP turns each score into a plain-language explanation based on the worker's own governed feature values. A PSI drift monitor compares the live feature and score distributions against the training baseline and raises a retrain flag when they shift. The score and the explanation persist to `gate.lapse_risk`. |
 | **Optimization** decide | `app/backend/optimizer.py` | A CP-SAT (OR-Tools) optimizer turns those risk scores into a compliant crew plan. Hard compliance rules are constraints; lapse risk is the objective. |
 | **Genie Agent** query | Genie space `01f1b7c3...`, `app/backend/genie.py`, `genie/benchmarks.md` | Natural-language questions over the gold tables, returning the SQL Genie ran so the answer is inspectable. Validated against a 15-question benchmark with expected SQL (87% on the last run). |
 | **Databricks App** surface | `app/` (FastAPI + static SPA) | Nine operational views for the supervisor, auditor, and plant manager, including the live What-if studio. |
@@ -94,8 +94,9 @@ framing, the value case, and the narrative are the author's.
 See `evidence/` for committed run output of every layer: model training metrics, batch
 scoring, the optimizer solve, the live What-if API response, the Genie transcript with
 generated SQL and rows, the Genie benchmark evaluation (15 questions with expected SQL,
-87% on the last run), and per-prediction model explanations with their SHAP attribution.
-The evaluator reads text; the evidence is text.
+87% on the last run), per-prediction model explanations with their SHAP attribution, and a
+drift-monitor run (PSI) that stays quiet on a stable population and raises the retrain flag
+on a shifted one. The evaluator reads text; the evidence is text.
 
 ## Data
 

@@ -1,0 +1,27 @@
+ClearShift lapse-risk drift monitor (PSI vs training baseline)
+======================================================================
+
+Control: a stable sample of the same population
+  overall PSI 0.003  ->  STABLE
+  score PSI   0.003
+      proactive_renewal_behavior   0.002
+      schedule_pressure            0.002
+      total_certs_held             0.001
+      days_to_expiry               0.001
+      prior_lapse_count            0.001
+      is_regulated                 0.001
+      training_backlog             0.000
+
+Test: a shifted population (aging certs, hiring wave)
+  overall PSI 6.348  ->  RETRAIN  (retrain + alert the data team)
+  score PSI   1.759
+      proactive_renewal_behavior   6.348
+      training_backlog             5.742
+      days_to_expiry               0.535
+      schedule_pressure            0.002
+      total_certs_held             0.001
+      prior_lapse_count            0.001
+      is_regulated                 0.000
+
+======================================================================
+The monitor stays quiet when the population is stable and raises the retrain flag when it shifts. In production it runs on the live scored population (--lakebase) on a schedule; label-based performance drift is the next layer once outcomes accrue.
