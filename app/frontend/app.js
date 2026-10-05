@@ -35,7 +35,6 @@ const SUPERVISOR_NAME = {
   '40101': 'Rosalind Vance (Welding)',
   '40102': 'Curtis Lindahl (Maintenance)',
   '40103': 'Gerald Pruitt (Paint/Blast)',
-  '50301': 'Marguerite Okonjo (Finance)',
 };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
@@ -2149,9 +2148,12 @@ function setScopeFooter(scopes) {
 }
 
 async function init() {
-  // Headquarters office scope served corporate learning only; site safety starts at the plant.
+  // Headquarters office scopes (the HQ site and its Finance crew) served corporate
+  // learning only; site safety starts at the plant.
+  const OFFICE_CREWS = ['50301'];
   const scopes = (await api('/api/gate/principals'))
-    .filter((s) => !(s.scope_type === 'SITE' && /headquarters/i.test(s.scope_value || '')));
+    .filter((s) => !(s.scope_type === 'SITE' && /headquarters/i.test(s.scope_value || '')))
+    .filter((s) => !(s.scope_type === 'CREW' && OFFICE_CREWS.includes(s.scope_value)));
   const sel = document.getElementById('principal');
 
   const label = (s) => {
