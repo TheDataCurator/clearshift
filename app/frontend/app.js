@@ -35,7 +35,6 @@ const SUPERVISOR_NAME = {
   '40101': 'Rosalind Vance (Welding)',
   '40102': 'Curtis Lindahl (Maintenance)',
   '40103': 'Gerald Pruitt (Paint/Blast)',
-  '50301': 'Marguerite Okonjo (Finance)',
 };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
@@ -659,10 +658,13 @@ async function loadOverview() {
     + tile('',        `${p.sites_onboarded}/${p.sites_total}`, 'Sites onboarded')
     + tile('',        p.workforce_estimate.toLocaleString(), 'Workforce in scope');
 
-  wireSubtabs('ov-mode', 'ov-pane', (mode) => {
+  // Trend leads; the map draws on first open so it measures a visible pane.
+  const ovPane = (mode) => {
     if (mode === 'trend') loadTrend().catch((e) => toast(`Trend failed: ${e.message}`));
-  });
-  await drawMap(d.sites);
+    if (mode === 'map') drawMap(d.sites).catch((e) => toast(`Map failed: ${e.message}`));
+  };
+  wireSubtabs('ov-mode', 'ov-pane', ovPane);
+  ovPane(document.querySelector('#ov-mode .subtab.active').dataset.mode);
 
   // Rollout schedule
   const RS = { LIVE: ['go', 'Live'], IN_FLIGHT: ['caution', 'Onboarding'], PLANNED: ['', 'Planned'] };
@@ -1406,109 +1408,6 @@ async function renderCard(employeeId) {
   </div>`;
 }
 
-// ------------------------------------------------------------- learning view
-
-const LRN = {
-  OVERDUE:     { cls: 'stop',    ico: '✕', word: 'Overdue' },
-  DUE_SOON:    { cls: 'caution', ico: '◆', word: 'Due soon' },
-  IN_PROGRESS: { cls: 'watch',   ico: '◷', word: 'In progress' },
-  ON_TRACK:    { cls: '',        ico: '○', word: 'On track' },
-  COMPLETE:    { cls: 'go',      ico: '✓', word: 'Complete' },
-};
-
-const CAT = {
-  COMPLIANCE:  { cls: 'stop', word: 'Compliance' },
-  ROLE:        { cls: 'watch', word: 'Role' },
-  DEVELOPMENT: { cls: 'go',   word: 'Development' },
-};
-
-async function loadLearning() {
-  wireSubtabs('lrn-mode', 'lrn-pane');
-  const d = await api(`/api/overview/learning?principal=${encodeURIComponent(principal)}`);
-  document.getElementById('lrn-date').textContent = fmtDate(d.as_of);
-  const s = d.summary;
-
-  document.getElementById('lrn-tiles').innerHTML =
-      tile(s.overdue ? 'stop' : 'go', s.overdue, 'Compliance overdue')
-    + tile('caution', s.due_soon, 'Due within the warning window')
-    + tile('', s.compliance_pct == null ? '—' : s.compliance_pct + '%', 'Compliance complete')
-    + tile('watch', s.development_active, 'Development in progress')
-    + tile('', s.people, 'People in scope');
-
-  // By manager
-  const tEl = document.getElementById('lrn-teams');
-  tEl.innerHTML = d.teams.length
-    ? `<thead><tr>
-        <th>Manager</th><th>Team</th><th>Compliance</th><th>Overdue</th>
-        <th>Due soon</th><th>Developing</th><th>Complete</th>
-      </tr></thead><tbody>` + d.teams.map((t) => `<tr>
-        <td>${esc(t.supervisor_name || '—')}</td>
-        <td class="mono">${t.team_size}</td>
-        <td class="mono">${t.compliance_complete}/${t.compliance_assigned}</td>
-        <td>${t.compliance_overdue
-              ? `<span class="pill stop">✕ ${t.compliance_overdue}</span>`
-              : '<span class="mono">—</span>'}</td>
-        <td class="mono">${t.compliance_due_soon || '—'}</td>
-        <td class="mono">${t.people_developing || '—'}</td>
-        <td>${t.compliance_pct != null
-              ? `<span class="pill ${t.compliance_pct === 100 ? 'go' : t.compliance_pct >= 80 ? 'watch' : 'stop'}">${t.compliance_pct}%</span>`
-              : '<span class="mono">—</span>'}</td>
-      </tr>`).join('') + '</tbody>'
-    : `<tr><td class="empty">No reporting lines in scope.</td></tr>`;
-
-  // Assignments
-  const rEl = document.getElementById('lrn-rows');
-  rEl.innerHTML = d.rows.length
-    ? `<thead><tr>
-        <th>Person</th><th>Role</th><th>Department</th><th>Course</th>
-        <th>Type</th><th>Authority</th><th>Due</th><th>Score</th><th>Status</th><th>Evidence</th>
-      </tr></thead><tbody>` + d.rows.map((r) => {
-        const k = LRN[r.status] || LRN.ON_TRACK;
-        const c = CAT[r.category] || CAT.COMPLIANCE;
-        const due = r.due_on
-          ? `<span class="mono">${esc(r.due_on)}</span>`
-            + (r.days_until_due != null && r.status !== 'COMPLETE'
-                ? `<div class="loc">${r.days_until_due < 0 ? Math.abs(r.days_until_due) + 'd late' : r.days_until_due + 'd'}</div>` : '')
-          : `<span class="mono">—</span>`;
-        return `<tr>
-          <td>${esc(r.employee_name)}</td>
-          <td>${esc(r.job_description)}</td>
-          <td>${esc(r.department)}</td>
-          <td>${esc(r.title)}${r.self_enrolled ? '<div class="loc">self-enrolled</div>' : ''}</td>
-          <td><span class="pill ${c.cls}">${c.word}</span></td>
-          <td class="mono">${esc(r.authority || '—')}</td>
-          <td>${due}</td>
-          <td class="mono">${r.score != null ? r.score : '—'}</td>
-          <td><span class="pill ${k.cls}">${k.ico} ${k.word}</span></td>
-          <td class="mono">${esc(r.evidence_ref || '—')}</td>
-        </tr>`;
-      }).join('') + '</tbody>'
-    : `<tr><td class="empty">No assignments in scope. Corporate learning covers office staff; switch scope to headquarters.</td></tr>`;
-
-  // By policy
-  const pEl = document.getElementById('lrn-policies');
-  pEl.innerHTML = `<thead><tr>
-      <th>Program</th><th>Type</th><th>Enforcement</th><th>Cadence</th>
-      <th>Owner</th><th>Authority</th><th>Assigned</th><th>Completion</th>
-    </tr></thead><tbody>` + d.policies.map((p) => {
-      const c = CAT[p.category] || CAT.COMPLIANCE;
-      const enf = { GATES_WORK: 'Gates work', DUE_DATE: 'Due date', ELECTIVE: 'Elective' }[p.enforcement] || p.enforcement;
-      return `<tr>
-        <td>${esc(p.title)}</td>
-        <td><span class="pill ${c.cls}">${c.word}</span></td>
-        <td class="mono">${esc(enf)}</td>
-        <td class="mono">${p.cadence_months ? p.cadence_months + ' mo' : '—'}</td>
-        <td>${esc(p.owner_name || '—')}</td>
-        <td class="mono">${esc(p.authority || '—')}</td>
-        <td class="mono">${p.assigned}</td>
-        <td>${p.completion_pct != null
-              ? `<span class="pill ${p.completion_pct === 100 ? 'go' : p.completion_pct >= 80 ? 'watch' : 'stop'}">${p.completion_pct}%</span>`
-              : '<span class="mono">—</span>'}</td>
-      </tr>`;
-    }).join('') + '</tbody>';
-}
-
-
 // ------------------------------------------------------------------ trend view
 
 /* Direction rather than level.
@@ -1734,7 +1633,6 @@ function loadHome() {
     ['osha',     'OSHA audit',            'Internal findings, and the roster an inspector spot-checks.'],
     ['renewal',  'Renewals',              'Credentials lapsed or lapsing within ninety days.'],
     ['training', 'Upcoming training',     'Scheduled sessions, plant and office.'],
-    ['learning', 'Corporate learning',    'Compliance obligations and elective development for office staff.'],
   ];
   document.getElementById('home-path').innerHTML = PATH.map(([v, t, d], i) =>
     `<button class="pcard" data-goto="${v}">
@@ -1784,7 +1682,7 @@ async function askSend(q) {
           + `<pre>${esc(r.sql)}</pre>${tbl}</details>`;
       }
     }
-    const jump = r.view
+    const jump = r.view && VIEWS.includes(r.view)
       ? `<button class="jump" data-goto="${esc(r.view)}">Open ${esc(VIEW_LABEL[r.view] || r.view)} →</button>`
       : '';
     const fell = r.genie_error
@@ -2150,7 +2048,7 @@ function loadDocs() {
 const LOADERS = {
   home: loadHome, overview: loadOverview, shift: loadShift,
   coverage: loadCoverage, site: loadSite, card: loadCard, osha: loadOsha, renewal: loadRenewal,
-  training: loadTraining, learning: loadLearning,
+  training: loadTraining,
   ask: loadAsk, docs: loadDocs,
 };
 let current = 'home';
@@ -2167,14 +2065,14 @@ function runLoader(view) {
  * that happen to share a shell, rather than one document with hidden parts.
  */
 const VIEWS = ['home', 'overview', 'shift', 'coverage', 'site', 'card',
-               'osha', 'renewal', 'training', 'learning', 'ask', 'docs'];
+               'osha', 'renewal', 'training', 'ask', 'docs'];
 
 const PAGE_TITLE = {
   home: 'ClearShift',
   overview: 'Network overview', shift: 'Pre-shift clearance',
   coverage: 'Coverage & what-if', site: 'Audit roster', card: 'Credential card',
   osha: 'OSHA audit', renewal: 'Renewals', training: 'Upcoming training',
-  learning: 'Corporate learning', ask: 'Ask ClearShift', docs: 'Documentation',
+  ask: 'Ask ClearShift', docs: 'Documentation',
 };
 
 function viewFromUrl() {
@@ -2250,7 +2148,12 @@ function setScopeFooter(scopes) {
 }
 
 async function init() {
-  const scopes = await api('/api/gate/principals');
+  // Headquarters office scopes (the HQ site and its Finance crew) served corporate
+  // learning only; site safety starts at the plant.
+  const OFFICE_CREWS = ['50301'];
+  const scopes = (await api('/api/gate/principals'))
+    .filter((s) => !(s.scope_type === 'SITE' && /headquarters/i.test(s.scope_value || '')))
+    .filter((s) => !(s.scope_type === 'CREW' && OFFICE_CREWS.includes(s.scope_value)));
   const sel = document.getElementById('principal');
 
   const label = (s) => {

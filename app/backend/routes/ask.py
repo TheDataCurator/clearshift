@@ -32,8 +32,6 @@ SUGGESTIONS = [
     "Where is cover thin?",
     "Who could cover blast and coating?",
     "What lapses in the next 90 days?",
-    "Who is overdue on compliance training?",
-    "Which manager has the worst completion?",
 ]
 
 

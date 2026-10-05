@@ -51,9 +51,6 @@
       <button class="nav-item" data-view="training">
         <span class="ni" aria-hidden="true">◈</span>Upcoming training
       </button>
-      <button class="nav-item" data-view="learning">
-        <span class="ni" aria-hidden="true">◐</span>Corporate learning
-      </button>
       <button class="nav-item" data-view="ask">
         <span class="ni" aria-hidden="true">✦</span>Ask ClearShift
       </button>
@@ -98,7 +95,7 @@
 
       <div class="path">
         <p class="eyebrow">Where to look first</p>
-        <h2>Nine views, in the order the day runs.</h2>
+        <h2>Eight views, in the order the day runs.</h2>
         <div class="path-grid" id="home-path"></div>
       </div>
     </section>
@@ -112,12 +109,12 @@
       <div class="tiles" id="ov-tiles"></div>
 
       <nav class="subtabs" id="ov-mode" role="tablist">
-        <button class="subtab active" data-mode="map"      role="tab">Map</button>
-        <button class="subtab"        data-mode="trend"    role="tab">Trend</button>
+        <button class="subtab active" data-mode="trend"    role="tab">Trend</button>
         <button class="subtab"        data-mode="schedule" role="tab">Rollout schedule</button>
+        <button class="subtab"        data-mode="map"      role="tab">Map</button>
       </nav>
 
-      <div id="ov-pane-map">
+      <div id="ov-pane-map" class="hidden">
       <div class="panel">
         <div class="panelhead">
           <h3>Rollout and readiness</h3>
@@ -132,7 +129,7 @@
       </div>
       </div>
 
-      <div id="ov-pane-trend" class="hidden">
+      <div id="ov-pane-trend">
         <div class="panel">
           <div class="panelhead">
             <h3>Direction over the last quarter</h3>
@@ -344,64 +341,6 @@
           <p class="panelsub">Sessions are marked where they would close a qualification gap that exists today.</p>
         </div>
         <div class="tablewrap"><table id="tr-table"></table></div>
-      </div>
-    </section>
-
-    <!-- Corporate learning -->
-    <section id="view-learning" class="view hidden">
-      <div class="viewhead">
-        <h2>Corporate learning</h2>
-        <p class="lede">Compliance obligations and elective development for office staff, as of <strong id="lrn-date"></strong>.</p>
-      </div>
-
-      <div class="callout">
-        <span class="co-ico" aria-hidden="true">◐</span>
-        <div>
-          <b>Same system, different resolver.</b> A plant requirement is triggered by the work
-          center and blocks work assignment. A corporate obligation is triggered by role or
-          department and carries a due date. Person, requirement, completion and evidence are
-          shared; only the trigger and the consequence differ.
-        </div>
-      </div>
-
-      <div class="tiles" id="lrn-tiles"></div>
-
-      <nav class="subtabs" id="lrn-mode" role="tablist">
-        <button class="subtab active" data-mode="teams"       role="tab">By manager</button>
-        <button class="subtab"        data-mode="assignments" role="tab">Assignments</button>
-        <button class="subtab"        data-mode="policies"    role="tab">By policy</button>
-      </nav>
-
-      <div id="lrn-pane-teams">
-      <div class="panel">
-        <div class="panelhead">
-          <h3>By manager</h3>
-          <p class="panelsub">Compliance completion by reporting line, rather than by work center.</p>
-        </div>
-        <div class="tablewrap"><table id="lrn-teams"></table></div>
-      </div>
-
-      </div>
-
-      <div id="lrn-pane-assignments" class="hidden">
-      <div class="panel">
-        <div class="panelhead">
-          <h3>Assignments</h3>
-          <p class="panelsub">Compliance obligations carry a due date. Development is elective and has none.</p>
-        </div>
-        <div class="tablewrap"><table id="lrn-rows"></table></div>
-      </div>
-
-      </div>
-
-      <div id="lrn-pane-policies" class="hidden">
-      <div class="panel">
-        <div class="panelhead">
-          <h3>By policy</h3>
-          <p class="panelsub">Completion per program, with the owner and the authority it derives from.</p>
-        </div>
-        <div class="tablewrap"><table id="lrn-policies"></table></div>
-      </div>
       </div>
     </section>
 
