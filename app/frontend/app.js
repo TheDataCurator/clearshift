@@ -798,13 +798,22 @@ async function initWhatif() {
   document.getElementById('wi-uncovered').innerHTML = '';
   const btn = document.getElementById('wi-solve');
   btn.disabled = d.seat_count === 0;
-  btn.onclick = solveWhatif;
+  btn.onclick = () => solveWhatif(false);
+  // The plan is produced by the nightly run, so it is already on screen when the
+  // page opens; the button re-plans on demand.
+  if (d.seat_count > 0) solveWhatif(true);
 }
 
-async function solveWhatif() {
+function eveningBefore(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+async function solveWhatif(scheduled) {
   const btn = document.getElementById('wi-solve');
   btn.disabled = true;
-  document.getElementById('wi-status').textContent = 'Solving with CP-SAT…';
+  document.getElementById('wi-status').textContent = scheduled ? 'Loading the nightly plan…' : 'Re-planning with CP-SAT…';
   try {
     const d = await api('/api/whatif/solve', {
       method: 'POST',
@@ -816,9 +825,13 @@ async function solveWhatif() {
         tile('go',      s.covered,          'Seats compliantly staffed')
       + tile('caution', s.exposure_cleared, 'Exposed seats now cleared')
       + tile('stop',    s.uncovered,        'Cannot staff compliantly');
+    const w = window._wi || {};
+    const when = scheduled
+      ? `Nightly run, ${eveningBefore(w.work_date)} at 6:00 PM`
+      : `Refreshed at ${new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
     document.getElementById('wi-status').textContent =
-      `${d.status} · total assigned lapse risk ${s.total_assigned_lapse_risk}. `
-      + 'Hard compliance rules are constraints, never traded off.';
+      `${when} · ${w.current ? w.current.exposed + ' of ' + w.current.seats + ' seats exposed under the posted schedule · ' : ''}`
+      + `total assigned lapse risk ${s.total_assigned_lapse_risk}. Hard compliance rules are constraints, never traded off.`;
 
     document.getElementById('wi-plan').innerHTML =
       `<div class="wi-h">The plan</div>`
@@ -838,7 +851,7 @@ async function solveWhatif() {
         </div>`).join('');
 
     document.getElementById('wi-uncovered').innerHTML = d.uncovered.length
-      ? `<div class="wi-h wi-h-stop">Still exposed — act before the shift</div>`
+      ? `<div class="wi-h wi-h-stop">Still exposed: act before the shift</div>`
         + d.uncovered.map((u) => `
           <div class="cover-row">
             <span class="pill ${WI_CLEAR[u.current_clearance]?.cls || 'stop'}">
@@ -850,7 +863,7 @@ async function solveWhatif() {
           </div>`).join('')
       : `<p class="empty">Every regulated seat can be compliantly staffed.</p>`;
   } catch (e) {
-    document.getElementById('wi-status').textContent = `Solve failed: ${e.message}`;
+    document.getElementById('wi-status').textContent = `Plan failed: ${e.message}`;
   } finally {
     btn.disabled = false;
   }

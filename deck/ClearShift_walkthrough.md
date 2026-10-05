@@ -85,10 +85,10 @@ Go to **Coverage and what-if**, top of the What-if studio, and reference the wor
 
 ## 5. The What-if studio (show, the centerpiece) — 3 minutes
 
-Stay on **Coverage and what-if**. Read the three tiles, then click **Solve tomorrow's crew**.
+Stay on **Coverage and what-if**. The plan is already on screen: it runs automatically every evening at 6:00 PM, once tomorrow's schedule publishes. **Refresh plan** re-runs it on demand after a late swap or call-off.
 
 - Tell: "Seven regulated seats tomorrow. Five are exposed under the current schedule."
-- Show: click Solve. "A CP-SAT optimizer just built a compliant plan. It cleared two exposed seats by moving the right qualified people, and it preferred the workers whose own certification is least likely to lapse."
+- Show: the nightly plan, then click Refresh plan. "A CP-SAT optimizer built a compliant plan overnight. It cleared two exposed seats by moving the right qualified people, and it preferred the workers whose own certification is least likely to lapse."
 - Show: point to the re-planned assignments and the lapse-risk pills.
 - Show: the **Still exposed** section. Read the three reasons: no worker holds the full requirement, a first performance with no supervisor available, and capacity fully committed.
 - Tell: "Hard compliance rules are constraints. The optimizer will never trade them off. It would rather tell you a seat has no compliant answer than quietly fill it."
